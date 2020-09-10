@@ -18,15 +18,16 @@ public class Bootstrap {
         try {
             int port = 18080;
 
-            if (!NetUtil.isUsableLocalPort(port)) { // 判断端口是否被占用，没被占用返回true
+            // 判断端口是否被占用，没被占用返回 true
+            if (!NetUtil.isUsableLocalPort(port)) {
                 System.out.println(port + "端口已被占用");
                 return;
             }
-            // 服务端打开port端口
+            // 服务端打开 port 端口
             ServerSocket ss = new ServerSocket(port);
 
             while (true) {
-                // 监听port端口，看是否有连接请求过来
+                // 监听 port 端口，看是否有连接请求过来
                 Socket s =  ss.accept();
                 // 表示收到一个浏览器客户端的请求
                 InputStream is = s.getInputStream();
@@ -43,7 +44,8 @@ public class Bootstrap {
                 String responseString = "Hello DIY Tomcat from how2j.cn";
                 responseString = response_head + responseString;
                 os.write(responseString.getBytes());
-                os.flush(); // 强制把缓存中的数据写出
+                // 强制把缓存中的数据写出
+                os.flush();
                 s.close();
             }
         } catch (IOException e) {
