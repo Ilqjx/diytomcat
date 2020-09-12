@@ -18,7 +18,7 @@ public class TestTomcat {
     @BeforeClass
     public static void beforeClass() {
         // 测试开始前检查 diytomcat 是否已经启动
-        if (NetUtil.isUsableLocalPort(port)) { // 检查端口是否可用
+        if (NetUtil.isUsableLocalPort(port)) { // 检查端口是否可用，也会访问服务器
             // 错误输出
             System.err.println("请先启动位于端口：" + port + " 的diytomcat，否则不会进行单元测试.");
             // 标准输出

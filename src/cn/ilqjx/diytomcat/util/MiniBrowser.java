@@ -142,25 +142,10 @@ public class MiniBrowser {
             PrintWriter printWriter = new PrintWriter(client.getOutputStream(), true);
             // 发送信息到服务器
             printWriter.println(httpRequestString);
-            // 接受服务器发送的信息
+            // 接收服务器发送的信息
             InputStream is = client.getInputStream();
-
             // 将 is 接收到的信息转换为字节数组
-            int buffer_size = 1024;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[buffer_size];
-            while (true) {
-                int length = is.read(buffer);
-                if (length == -1) {
-                    break;
-                }
-                baos.write(buffer, 0, length);
-                if (length != buffer_size) {
-                    break;
-                }
-            }
-
-            result = baos.toByteArray();
+            result = readBytes(is);
             client.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -170,6 +155,32 @@ public class MiniBrowser {
                 ex.printStackTrace();
             }
         }
+        return result;
+    }
+
+    /**
+     * 将输入流中的数据读取到字节数组中
+     *
+     * @param is
+     * @return
+     * @throws IOException
+     */
+    public static byte[] readBytes(InputStream is) throws IOException {
+        int buffer_size = 1024;
+        byte[] buffer = new byte[buffer_size];
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (true) {
+            int length = is.read(buffer);
+            if (length == -1) {
+                break;
+            }
+            // 输出到内存中
+            baos.write(buffer, 0, length);
+            if (length != buffer_size) {
+                break;
+            }
+        }
+        byte[] result = baos.toByteArray();
         return result;
     }
 }

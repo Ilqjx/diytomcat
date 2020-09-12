@@ -1,7 +1,10 @@
 package cn.ilqjx.diytomcat;
 
 import cn.hutool.core.util.NetUtil;
+import cn.ilqjx.diytomcat.http.Request;
+import cn.ilqjx.diytomcat.util.MiniBrowser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,12 +33,9 @@ public class Bootstrap {
                 // 监听 port 端口，看是否有连接请求过来
                 Socket s =  ss.accept();
                 // 表示收到一个浏览器客户端的请求
-                InputStream is = s.getInputStream();
-                int bufferSize = 1024;
-                byte[] buffer = new byte[bufferSize];
-                is.read(buffer);
-                String requestString = new String(buffer, "utf-8");
-                System.out.println("浏览器的输入信息：\r\n" + requestString);
+                Request request = new Request(s);
+                System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
+                System.out.println("uri：" + request.getUri());
 
                 // 打开输出流，准备给客户端输出信息
                 OutputStream os = s.getOutputStream();
