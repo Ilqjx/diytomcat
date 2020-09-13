@@ -2,6 +2,7 @@ package cn.ilqjx.diytomcat.http;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * @author upfly
@@ -16,14 +17,21 @@ public class Response {
 
     public Response() {
         this.stringWriter = new StringWriter();
+        // writer 写进来的数据最后都写到 stringWriter 中了
         this.writer = new PrintWriter(stringWriter);
         this.contentType = "text/html";
     }
 
-    public byte[] getBody() {
+    /**
+     * 返回 html 的字节数组
+     *
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    public byte[] getBody() throws UnsupportedEncodingException {
         String content = stringWriter.toString();
-
-        return null;
+        byte[] body = content.getBytes("utf-8");
+        return body;
     }
 
     public PrintWriter getWriter() {

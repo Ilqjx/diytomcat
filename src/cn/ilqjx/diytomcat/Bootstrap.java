@@ -1,13 +1,14 @@
 package cn.ilqjx.diytomcat;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.http.Request;
+import cn.ilqjx.diytomcat.http.Response;
+import cn.ilqjx.diytomcat.util.Constant;
 import cn.ilqjx.diytomcat.util.MiniBrowser;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -37,19 +38,40 @@ public class Bootstrap {
                 System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
                 System.out.println("uri：" + request.getUri());
 
+                Response response = new Response();
+                String html = "Hello DIY Tomcat from how2j.cn";
+                response.getWriter().println(html);
+                handle200(s, response);
+
                 // 打开输出流，准备给客户端输出信息
-                OutputStream os = s.getOutputStream();
+                // OutputStream os = s.getOutputStream();
                 // 响应头，web服务器和浏览器之间通信需要遵循http协议，所以需要加一个头信息
-                String response_head = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n";
-                String responseString = "Hello DIY Tomcat from how2j.cn";
-                responseString = response_head + responseString;
-                os.write(responseString.getBytes());
+                // String response_head = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n";
+                // String responseString = "Hello DIY Tomcat from how2j.cn";
+                // responseString = response_head + responseString;
+                // os.write(responseString.getBytes());
                 // 强制把缓存中的数据写出
-                os.flush();
-                s.close();
+                // os.flush();
+                // s.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void handle200(Socket s, Response response) throws IOException {
+        String contentType = response.getContentType();
+        String headText = StrUtil.format(Constant.RESPONSE_HEAD_200, contentType);
+
+        byte[] head = headText.getBytes();
+        byte[] body = response.getBody();
+        byte[] responseBytes = new byte[head.length + body.length];
+
+        ArrayUtil.copy(head, 0, responseBytes, 0, head.length);
+        ArrayUtil.copy(body, 0, responseBytes, head.length, body.length);
+
+        OutputStream os = s.getOutputStream();
+        os.write(responseBytes);
+        s.close();
     }
 }
