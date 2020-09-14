@@ -1,12 +1,12 @@
 package cn.ilqjx.diytomcat;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
-import cn.ilqjx.diytomcat.util.MiniBrowser;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -38,9 +38,27 @@ public class Bootstrap {
                 System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
                 System.out.println("uri：" + request.getUri());
 
+                String uri = request.getUri();
+                if (uri == null) {
+                    continue;
+                }
+                System.out.println(uri);
+
                 Response response = new Response();
-                String html = "Hello DIY Tomcat from how2j.cn";
-                response.getWriter().println(html);
+                if ("/".equals(uri)) {
+                    String html = "Hello DIY Tomcat from how2j.cn";
+                    response.getWriter().println(html);
+                } else {
+                    String fileName = StrUtil.removePrefix(uri, "/");
+                    File file = FileUtil.file(Constant.ROOT_FOLDER, fileName);
+                    if (file.exists()) {
+                        String fileContent = FileUtil.readUtf8String(file);
+                        response.getWriter().println(fileContent);
+                    } else {
+                        response.getWriter().println("File Not Found");
+                    }
+                }
+
                 handle200(s, response);
 
                 // 打开输出流，准备给客户端输出信息
