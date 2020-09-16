@@ -2,6 +2,7 @@ package cn.ilqjx.diytomcat;
 
 import cn.hutool.bloomfilter.filter.SDBMFilter;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NetUtil;
 import cn.hutool.core.util.StrUtil;
@@ -30,6 +31,7 @@ public class Bootstrap {
 
             int port = 18080;
 
+            // 注释掉了，为了和 tomcat 保持一致
             // 判断端口是否被占用，没被占用返回 true
             // if (!NetUtil.isUsableLocalPort(port)) {
             //     System.out.println(port + "端口已被占用");
@@ -62,6 +64,10 @@ public class Bootstrap {
                     if (file.exists()) {
                         String fileContent = FileUtil.readUtf8String(file);
                         response.getWriter().println(fileContent);
+
+                        if ("timeConsume.htm".equals(fileName)) {
+                            ThreadUtil.sleep(1000);
+                        }
                     } else {
                         response.getWriter().println("File Not Found");
                     }

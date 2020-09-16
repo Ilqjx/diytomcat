@@ -7,6 +7,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author upfly
  * @create 2020-09-11 19:30
@@ -40,6 +45,15 @@ public class TestTomcat {
     public void testAHtml() {
         String html = getContentString("/a.html");
         Assert.assertEquals(html, "Hello DIY Tomcat from a.html");
+    }
+
+    @Test
+    public void testTimeConsumeHtml() {
+        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(20,
+                20, 60, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(10));
+
+
     }
 
     private String getContentString(String uri) {
