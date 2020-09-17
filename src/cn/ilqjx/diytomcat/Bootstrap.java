@@ -1,18 +1,19 @@
 package cn.ilqjx.diytomcat;
 
-import cn.hutool.bloomfilter.filter.SDBMFilter;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.NetUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.hutool.system.SystemUtil;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
+import cn.ilqjx.diytomcat.util.ThreadPoolUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedHashMap;
@@ -43,48 +44,59 @@ public class Bootstrap {
             while (true) {
                 // 监听 port 端口，看是否有连接请求过来
                 Socket s =  ss.accept();
-                // 表示收到一个浏览器客户端的请求
-                Request request = new Request(s);
-                System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
-                System.out.println("uri：" + request.getUri());
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // 表示收到一个浏览器客户端的请求
+                            Request request = new Request(s);
+                            Response response = new Response();
 
-                String uri = request.getUri();
-                if (uri == null) {
-                    continue;
-                }
-                System.out.println(uri);
+                            String uri = request.getUri();
+                            if (uri == null) {
+                                return;
+                            }
 
-                Response response = new Response();
-                if ("/".equals(uri)) {
-                    String html = "Hello DIY Tomcat from how2j.cn";
-                    response.getWriter().println(html);
-                } else {
-                    String fileName = StrUtil.removePrefix(uri, "/");
-                    File file = FileUtil.file(Constant.ROOT_FOLDER, fileName);
-                    if (file.exists()) {
-                        String fileContent = FileUtil.readUtf8String(file);
-                        response.getWriter().println(fileContent);
+                            // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
+                            // System.out.println("uri：" + request.getUri());
 
-                        if ("timeConsume.htm".equals(fileName)) {
-                            ThreadUtil.sleep(1000);
+                            if ("/".equals(uri)) {
+                                String html = "Hello DIY Tomcat from how2j.cn";
+                                response.getWriter().println(html);
+                            } else {
+                                String fileName = StrUtil.removePrefix(uri, "/");
+                                File file = FileUtil.file(Constant.ROOT_FOLDER, fileName);
+                                if (file.exists()) {
+                                    String fileContent = FileUtil.readUtf8String(file);
+                                    response.getWriter().println(fileContent);
+
+                                    if ("timeConsume.html".equals(fileName)) {
+                                        ThreadUtil.sleep(1000);
+                                    }
+                                } else {
+                                    response.getWriter().println("File Not Found");
+                                }
+                            }
+
+                            handle200(s, response);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } else {
-                        response.getWriter().println("File Not Found");
+
+                        // 打开输出流，准备给客户端输出信息
+                        // OutputStream os = s.getOutputStream();
+                        // 响应头，web服务器和浏览器之间通信需要遵循http协议，所以需要加一个头信息
+                        // String response_head = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n";
+                        // String responseString = "Hello DIY Tomcat from how2j.cn";
+                        // responseString = response_head + responseString;
+                        // os.write(responseString.getBytes());
+                        // 强制把缓存中的数据写出
+                        // os.flush();
+                        // s.close();
                     }
-                }
+                };
 
-                handle200(s, response);
-
-                // 打开输出流，准备给客户端输出信息
-                // OutputStream os = s.getOutputStream();
-                // 响应头，web服务器和浏览器之间通信需要遵循http协议，所以需要加一个头信息
-                // String response_head = "HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n\r\n";
-                // String responseString = "Hello DIY Tomcat from how2j.cn";
-                // responseString = response_head + responseString;
-                // os.write(responseString.getBytes());
-                // 强制把缓存中的数据写出
-                // os.flush();
-                // s.close();
+                ThreadPoolUtil.run(runnable);
             }
         } catch (IOException e) {
             LogFactory.get().error(e);
