@@ -6,6 +6,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.hutool.system.SystemUtil;
+import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -25,10 +27,13 @@ import java.util.Set;
  * @create 2020-09-06 20:42
  */
 public class Bootstrap {
+    public static Map<String, Context> contextMap = new HashMap<>(); // 存放路径对 Context 的映射
 
     public static void main(String[] args) {
         try {
             logJVM();
+
+            scanContextsOnWebAppsFolder();
 
             int port = 18080;
 
@@ -57,8 +62,8 @@ public class Bootstrap {
                                 return;
                             }
 
-                            // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
-                            // System.out.println("uri：" + request.getUri());
+                            System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
+                            System.out.println("uri：" + request.getUri());
 
                             if ("/".equals(uri)) {
                                 String html = "Hello DIY Tomcat from how2j.cn";
@@ -102,6 +107,37 @@ public class Bootstrap {
             LogFactory.get().error(e);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 扫描 webapps 文件夹下的目录，对这些目录调用 loadContext(File folder) 进行加载
+     */
+    private static void scanContextsOnWebAppsFolder() {
+        File[] folders = Constant.WEBAPPS_FOLDER.listFiles();
+        for (File folder : folders) {
+            if (!folder.isDirectory()) {
+                continue;
+            }
+            loadContext(folder);
+        }
+    }
+
+    /**
+     * 加载这个目录成为 Context 对象
+     * @param folder
+     */
+    private static void loadContext(File folder) {
+        String path = folder.getName();
+        if ("ROOT".equals(path)) {
+            path = "/";
+        } else {
+            path = "/" + path;
+        }
+
+        String docBase = folder.getAbsolutePath();
+        Context context = new Context(path, docBase);
+
+        contextMap.put(context.getPath(), context);
     }
 
     private static void logJVM() {

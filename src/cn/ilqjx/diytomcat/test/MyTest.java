@@ -1,5 +1,6 @@
 package cn.ilqjx.diytomcat.test;
 
+import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.util.Constant;
 import org.junit.Test;
 
@@ -10,6 +11,34 @@ import java.io.File;
  * @create 2020-09-14 19:21
  */
 public class MyTest {
+
+    @Test
+    public void test5() {
+
+    }
+
+    @Test
+    public void test4() {
+        String uri = "/a/index.html/";
+        String path = StrUtil.subBetween(uri, "/", "/");
+        System.out.println(path);
+    }
+
+    @Test
+    public void test3() {
+        String str = null;
+        if (str == null) {
+            System.out.println("null");
+        }
+    }
+
+    @Test
+    public void test2() {
+        // File folder = new File("D:\\download\\log4j");
+        File folder = new File("D:\\download\\log4j\\bin\\log4j\\TestLog4j.class");
+        String name = folder.getName();
+        System.out.println(name);
+    }
 
     @Test
     public void test1() {
