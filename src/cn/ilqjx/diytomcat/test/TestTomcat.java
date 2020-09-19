@@ -44,8 +44,8 @@ public class TestTomcat {
 
     @Test
     public void testAHtml() {
-        String html = getContentString("/a.html");
-        Assert.assertEquals(html, "Hello DIY Tomcat from a.html");
+        String html = getContentString("/a/index.html");
+        Assert.assertEquals(html, "Hello DIY Tomcat from index.html@a");
     }
 
     @Test

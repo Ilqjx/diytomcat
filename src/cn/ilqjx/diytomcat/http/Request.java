@@ -28,7 +28,8 @@ public class Request {
         parseUri();
         parseContext();
         if (!"/".equals(context.getPath())) {
-            // 如果不是根路径，
+            // 如果不是根路径，需要对 uri 进行修正
+            // uri: /a/index.html，path: /a，uri 就应该是 /index.html
             uri = StrUtil.removePrefix(uri, context.getPath());
         }
     }
@@ -84,5 +85,9 @@ public class Request {
 
     public String getUri() {
         return uri;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

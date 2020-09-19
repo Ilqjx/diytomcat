@@ -16,4 +16,7 @@ public class Constant {
     public static final File WEBAPPS_FOLDER =
             new File(SystemUtil.get("user.dir"), "webapps");
     public static final File ROOT_FOLDER = new File(WEBAPPS_FOLDER, "ROOT");
+
+    public static final File CONF_FOLDER = new File(SystemUtil.get("user.dir"), "conf");
+    public static final File SERVER_XML_FILE = new File(CONF_FOLDER, "server.xml");
 }

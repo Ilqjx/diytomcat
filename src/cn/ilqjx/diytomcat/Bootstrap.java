@@ -62,16 +62,19 @@ public class Bootstrap {
                                 return;
                             }
 
-                            System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
-                            System.out.println("uri：" + request.getUri());
+                            // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
+                            // System.out.println("uri：" + request.getUri());
+
+                            Context context = request.getContext();
 
                             if ("/".equals(uri)) {
                                 String html = "Hello DIY Tomcat from how2j.cn";
                                 response.getWriter().println(html);
                             } else {
                                 String fileName = StrUtil.removePrefix(uri, "/");
-                                File file = FileUtil.file(Constant.ROOT_FOLDER, fileName);
+                                File file = FileUtil.file(context.getDocBase(), fileName);
                                 if (file.exists()) {
+                                    // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
                                     String fileContent = FileUtil.readUtf8String(file);
                                     response.getWriter().println(fileContent);
 
