@@ -10,6 +10,7 @@ import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
+import cn.ilqjx.diytomcat.util.ServerXMLUtil;
 import cn.ilqjx.diytomcat.util.ThreadPoolUtil;
 
 import java.io.File;
@@ -17,10 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author upfly
@@ -34,6 +32,7 @@ public class Bootstrap {
             logJVM();
 
             scanContextsOnWebAppsFolder();
+            scanContextsInServerXML();
 
             int port = 18080;
 
@@ -109,6 +108,16 @@ public class Bootstrap {
         } catch (IOException e) {
             LogFactory.get().error(e);
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 扫描 server.xml文件里的　Context
+     */
+    private static void scanContextsInServerXML() {
+        List<Context> contexts = ServerXMLUtil.getContexts();
+        for (Context context : contexts) {
+            contextMap.put(context.getPath(), context);
         }
     }
 

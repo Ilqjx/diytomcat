@@ -92,6 +92,12 @@ public class TestTomcat {
         Assert.assertTrue(duration < 3000);
     }
 
+    @Test
+    public void testBIndex() {
+        String html = getContentString("/b/index.html");
+        Assert.assertEquals(html,"Hello DIY Tomcat from index.html@b");
+    }
+
     private String getContentString(String uri) {
         String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
         String content = MiniBrowser.getContentString(url);
