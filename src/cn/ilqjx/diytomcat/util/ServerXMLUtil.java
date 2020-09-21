@@ -2,6 +2,8 @@ package cn.ilqjx.diytomcat.util;
 
 import cn.hutool.core.io.FileUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
+import cn.ilqjx.diytomcat.catalina.Engine;
+import cn.ilqjx.diytomcat.catalina.Host;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,6 +29,37 @@ public class ServerXMLUtil {
             String docBase = element.attr("docBase");
             Context context = new Context(path, docBase);
             result.add(context);
+        }
+
+        return result;
+    }
+
+    public static String getHostName() {
+        String xml = FileUtil.readUtf8String(Constant.SERVER_XML_FILE);
+        Document document = Jsoup.parse(xml);
+        Element element = document.select("Host").first();
+        String hostName = element.attr("name");
+        return hostName;
+    }
+
+    public static String getEngineDefaultHost() {
+        String xml = FileUtil.readUtf8String(Constant.SERVER_XML_FILE);
+        Document document = Jsoup.parse(xml);
+        Element element = document.select("Engine").first();
+        String defaultHost = element.attr("defaultHost");
+        return defaultHost;
+    }
+
+    public static List<Host> getHosts(Engine engine) {
+        List<Host> result = new ArrayList<>();
+        String xml = FileUtil.readUtf8String(Constant.SERVER_XML_FILE);
+        Document document = Jsoup.parse(xml);
+        Elements elements = document.select("Host");
+
+        for (Element element : elements) {
+            String name = element.attr("name");
+            Host host = new Host(name, engine);
+            result.add(host);
         }
 
         return result;

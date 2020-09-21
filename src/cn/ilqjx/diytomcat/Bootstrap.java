@@ -7,10 +7,10 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.hutool.system.SystemUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
+import cn.ilqjx.diytomcat.catalina.Engine;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
-import cn.ilqjx.diytomcat.util.ServerXMLUtil;
 import cn.ilqjx.diytomcat.util.ThreadPoolUtil;
 
 import java.io.File;
@@ -18,21 +18,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author upfly
  * @create 2020-09-06 20:42
  */
 public class Bootstrap {
-    public static Map<String, Context> contextMap = new HashMap<>(); // 存放路径对 Context 的映射
 
     public static void main(String[] args) {
         try {
             logJVM();
 
-            scanContextsOnWebAppsFolder();
-            scanContextsInServerXML();
+           Engine engine = new Engine();
 
             int port = 18080;
 
@@ -53,7 +53,7 @@ public class Bootstrap {
                     public void run() {
                         try {
                             // 表示收到一个浏览器客户端的请求
-                            Request request = new Request(s);
+                            Request request = new Request(s, engine);
                             Response response = new Response();
 
                             String uri = request.getUri();
@@ -109,47 +109,6 @@ public class Bootstrap {
             LogFactory.get().error(e);
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 扫描 server.xml文件里的　Context
-     */
-    private static void scanContextsInServerXML() {
-        List<Context> contexts = ServerXMLUtil.getContexts();
-        for (Context context : contexts) {
-            contextMap.put(context.getPath(), context);
-        }
-    }
-
-    /**
-     * 扫描 webapps 文件夹下的目录，对这些目录调用 loadContext(File folder) 进行加载
-     */
-    private static void scanContextsOnWebAppsFolder() {
-        File[] folders = Constant.WEBAPPS_FOLDER.listFiles();
-        for (File folder : folders) {
-            if (!folder.isDirectory()) {
-                continue;
-            }
-            loadContext(folder);
-        }
-    }
-
-    /**
-     * 加载这个目录成为 Context 对象
-     * @param folder
-     */
-    private static void loadContext(File folder) {
-        String path = folder.getName();
-        if ("ROOT".equals(path)) {
-            path = "/";
-        } else {
-            path = "/" + path;
-        }
-
-        String docBase = folder.getAbsolutePath();
-        Context context = new Context(path, docBase);
-
-        contextMap.put(context.getPath(), context);
     }
 
     private static void logJVM() {

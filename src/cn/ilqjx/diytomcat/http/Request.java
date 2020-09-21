@@ -1,8 +1,8 @@
 package cn.ilqjx.diytomcat.http;
 
 import cn.hutool.core.util.StrUtil;
-import cn.ilqjx.diytomcat.Bootstrap;
 import cn.ilqjx.diytomcat.catalina.Context;
+import cn.ilqjx.diytomcat.catalina.Engine;
 import cn.ilqjx.diytomcat.util.MiniBrowser;
 
 import java.io.IOException;
@@ -18,9 +18,11 @@ public class Request {
     private String uri;
     private Socket socket;
     private Context context;
+    private Engine engine;
 
-    public Request(Socket socket) throws IOException {
+    public Request(Socket socket, Engine engine) throws IOException {
         this.socket = socket;
+        this.engine = engine;
         parseHttpRequest();
         if (StrUtil.isEmpty(requestString)) {
             return;
@@ -47,10 +49,10 @@ public class Request {
             path = "/" + path;
         }
 
-        context = Bootstrap.contextMap.get(path);
+        context = engine.getDefaultHost().getContext(path);
         // 如果 context 为 null，说明访问了一个不存在的路径
         if (context == null) {
-            context = Bootstrap.contextMap.get("/");
+            context = engine.getDefaultHost().getContext("/");
         }
     }
 

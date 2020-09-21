@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Server>
-    <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
+    <!-- servlet 引擎，处理 servlet 请求 -->
+    <!-- defaultHost="localhost" 表示默认的 Host 是 name="localhost" 的 Host -->
+    <Engine defaultHost="localhost">
+        <!-- Host 虚拟主机 -->
+        <Host name="localhost">
+            <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
+        </Host>
+    </Engine>
 </Server>

@@ -88,7 +88,7 @@ public class TestTomcat {
         threadPool.awaitTermination(1, TimeUnit.HOURS);
 
         long duration = timeInterval.intervalMs();
-        System.out.println("duration: " + duration);
+        // System.out.println("duration: " + duration);
         Assert.assertTrue(duration < 3000);
     }
 
