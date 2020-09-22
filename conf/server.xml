@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- 代表服务器本身 -->
 <Server>
-    <!-- servlet 引擎，处理 servlet 请求 -->
-    <!-- defaultHost="localhost" 表示默认的 Host 是 name="localhost" 的 Host -->
-    <Engine defaultHost="localhost">
-        <!-- Host 虚拟主机 -->
-        <Host name="localhost">
-            <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
-        </Host>
-    </Engine>
+    <!-- 代表 tomcat 提供的服务 -->
+    <Service name="Catalina">
+        <!-- servlet 引擎，处理 servlet 请求 -->
+        <!-- defaultHost="localhost" 表示默认的 Host 是 name="localhost" 的 Host -->
+        <Engine defaultHost="localhost">
+            <!-- Host 虚拟主机 -->
+            <Host name="localhost">
+                <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
+            </Host>
+        </Engine>
+    </Service>
 </Server>

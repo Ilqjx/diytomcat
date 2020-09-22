@@ -3,6 +3,7 @@ package cn.ilqjx.diytomcat.http;
 import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.catalina.Engine;
+import cn.ilqjx.diytomcat.catalina.Service;
 import cn.ilqjx.diytomcat.util.MiniBrowser;
 
 import java.io.IOException;
@@ -18,11 +19,11 @@ public class Request {
     private String uri;
     private Socket socket;
     private Context context;
-    private Engine engine;
+    private Service service;
 
-    public Request(Socket socket, Engine engine) throws IOException {
+    public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
-        this.engine = engine;
+        this.service = service;
         parseHttpRequest();
         if (StrUtil.isEmpty(requestString)) {
             return;
@@ -49,6 +50,7 @@ public class Request {
             path = "/" + path;
         }
 
+        Engine engine = service.getEngine();
         context = engine.getDefaultHost().getContext(path);
         // 如果 context 为 null，说明访问了一个不存在的路径
         if (context == null) {
@@ -61,6 +63,7 @@ public class Request {
      * @throws IOException
      */
     private void parseHttpRequest() throws IOException {
+        // 接收从浏览器发送过来的信息
         InputStream is = this.socket.getInputStream();
         byte[] bytes = MiniBrowser.readBytes(is);
         requestString = new String(bytes, "utf-8");

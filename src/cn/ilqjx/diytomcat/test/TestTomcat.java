@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
  * @create 2020-09-11 19:30
  */
 public class TestTomcat {
-    private static int port = 18080;
     private static String ip = "127.0.0.1";
+    private static int port = 18080;
 
     @BeforeClass
     public static void beforeClass() {
@@ -98,9 +98,39 @@ public class TestTomcat {
         Assert.assertEquals(html,"Hello DIY Tomcat from index.html@b");
     }
 
+    @Test
+    public void test404() {
+        String uri = "/not_exist.html";
+        String response = getHttpString(uri);
+        containAssert(response, "HTTP/1.1 404 Not Found");
+    }
+
     private String getContentString(String uri) {
         String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
         String content = MiniBrowser.getContentString(url);
         return content;
+    }
+
+    /**
+     * 以字符串形式获取 http 响应
+     *
+     * @param uri
+     * @return
+     */
+    private String getHttpString(String uri) {
+        String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
+        String httpString = MiniBrowser.getHttpString(url);
+        return httpString;
+    }
+
+    /**
+     * 判断 html 里是否包含某段字符串
+     *
+     * @param html
+     * @param str
+     */
+    private void containAssert(String html, String str) {
+        boolean isContain = StrUtil.containsAny(html, str);
+        Assert.assertTrue(isContain);
     }
 }

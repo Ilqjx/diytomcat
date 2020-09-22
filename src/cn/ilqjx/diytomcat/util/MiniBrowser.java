@@ -74,6 +74,12 @@ public class MiniBrowser {
         return result;
     }
 
+    /**
+     * 返回字符串的 http 响应
+     *
+     * @param url
+     * @return
+     */
     public static String getHttpString(String url) {
         return getHttpString(url, false);
     }
