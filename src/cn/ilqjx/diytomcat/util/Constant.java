@@ -24,6 +24,8 @@ public class Constant {
     public static final File CONF_FOLDER = new File(SystemUtil.get("user.dir"), "conf");
     public static final File SERVER_XML_FILE = new File(CONF_FOLDER, "server.xml");
 
+    public static final File WEB_XML_FILE = new File(CONF_FOLDER, "web.xml");
+
     // 404 文本响应
     public static final String TEXT_FORMAT_404 =
             "<html><head><title>DIY Tomcat/1.0.1 - Error report</title><style>" +
