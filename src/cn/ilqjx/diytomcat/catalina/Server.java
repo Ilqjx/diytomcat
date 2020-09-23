@@ -65,6 +65,10 @@ public class Server {
                                 return;
                             }
 
+                            if ("/500.html".equals(uri)) {
+                                throw new RuntimeException("this is a deliberately created exception");
+                            }
+
                             // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
                             // System.out.println("uri：" + request.getUri());
 
@@ -91,8 +95,10 @@ public class Server {
                             }
 
                             handle200(s, response);
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
+                            LogFactory.get().error(e);
+                            // 当服务器内部抛出异常返回 500 响应
+                            handle500(s, e);
                         } finally {
                             try {
                                 if (!s.isClosed()) {
@@ -170,11 +176,56 @@ public class Server {
         os.write(responseBytes);
     }
 
+    /**
+     * 返回 404 响应
+     *
+     * @param socket
+     * @param uri
+     * @throws IOException
+     */
     protected void handle404(Socket socket, String uri) throws IOException {
         OutputStream os = socket.getOutputStream();
         String responseText = StrUtil.format(Constant.TEXT_FORMAT_404, uri, uri);
         responseText = Constant.RESPONSE_HEAD_404 + responseText;
         byte[] responseBytes = responseText.getBytes("utf-8");
         os.write(responseBytes);
+    }
+
+    /**
+     * 返回 500 响应
+     *
+     * @param socket
+     * @param e
+     */
+    protected void handle500(Socket socket, Exception e) {
+        try {
+            OutputStream os = socket.getOutputStream();
+
+            // e.getStackTrace(): 获取 Exception 的异常堆栈
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            StringBuffer buffer = new StringBuffer();
+            buffer.append(e.toString());
+            buffer.append("\r\n");
+            for (StackTraceElement element : stackTrace) {
+                buffer.append("\t");
+                buffer.append(element.toString());
+                buffer.append("\r\n");
+            }
+
+            // 获取异常信息
+            String message = e.getMessage();
+            // if (message != null && message.length() > 20) {
+            //     // 截取部分信息
+            //     message = message.substring(0, 19);
+            // }
+
+            String responseText = StrUtil.format(Constant.TEXT_FORMAT_500, message, e.toString(), buffer.toString());
+            responseText = Constant.RESPONSE_HEAD_500 + responseText;
+            byte[] responseBytes = responseText.getBytes("utf-8");
+
+            os.write(responseBytes);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 }

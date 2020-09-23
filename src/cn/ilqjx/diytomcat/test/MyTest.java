@@ -14,7 +14,10 @@ public class MyTest {
 
     @Test
     public void test5() {
-
+        RuntimeException exception = new RuntimeException("测试");
+        String message = exception.getMessage();
+        // System.out.println(message);
+        System.out.println(exception.toString());
     }
 
     @Test
