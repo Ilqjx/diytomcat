@@ -34,6 +34,10 @@ public class Request {
             // 如果不是根路径，需要对 uri 进行修正
             // uri: /a/index.html，path: /a，uri 就应该是 /index.html
             uri = StrUtil.removePrefix(uri, context.getPath());
+            // 如果 uri 为 /a，那么此时的 uri 就变成 "" 了，所以将 uri 修改为 "/"
+            if (StrUtil.isEmpty(uri)) {
+                uri = "/";
+            }
         }
     }
 
@@ -41,6 +45,13 @@ public class Request {
      * 解析 Context 对象
      */
     private void parseContext() {
+        Engine engine = service.getEngine();
+        context = engine.getDefaultHost().getContext(uri);
+        // 如果 context 不为 null，说明访问了一个存在的路径，此时访问的是例如 /a 这样的路径
+        if (context != null) {
+            return;
+        }
+
         // uri: ROOT目录下的路径 /index.html，a目录下的路径 /a/index.html 或 /a/b/index.html
         // StrUtil.subBetween(): 从前往后找到即返回，也就是找到后不会再继续向后寻找
         String path = StrUtil.subBetween(uri, "/", "/");
@@ -50,9 +61,8 @@ public class Request {
             path = "/" + path;
         }
 
-        Engine engine = service.getEngine();
         context = engine.getDefaultHost().getContext(path);
-        // 如果 context 为 null，说明访问了一个不存在的路径
+        // 如果 context 为 null，说明访问了一个不存在的路径，跳转到根路径
         if (context == null) {
             context = engine.getDefaultHost().getContext("/");
         }

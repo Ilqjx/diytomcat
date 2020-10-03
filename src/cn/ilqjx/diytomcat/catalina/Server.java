@@ -10,6 +10,7 @@ import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
 import cn.ilqjx.diytomcat.util.ThreadPoolUtil;
+import cn.ilqjx.diytomcat.util.WebXMLUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,23 +76,23 @@ public class Server {
                             Context context = request.getContext();
 
                             if ("/".equals(uri)) {
-                                String html = "Hello DIY Tomcat from how2j.cn";
-                                response.getWriter().println(html);
-                            } else {
-                                String fileName = StrUtil.removePrefix(uri, "/");
-                                File file = FileUtil.file(context.getDocBase(), fileName);
-                                if (file.exists()) {
-                                    // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
-                                    String fileContent = FileUtil.readUtf8String(file);
-                                    response.getWriter().println(fileContent);
+                                // 获取欢迎文件名
+                                uri = WebXMLUtil.getWelcomeFile(context);
+                            }
 
-                                    if ("timeConsume.html".equals(fileName)) {
-                                        ThreadUtil.sleep(1000);
-                                    }
-                                } else {
-                                    handle404(s, uri);
-                                    return;
+                            String fileName = StrUtil.removePrefix(uri, "/");
+                            File file = new File(context.getDocBase(), fileName);
+                            if (file.exists()) {
+                                // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
+                                String fileContent = FileUtil.readUtf8String(file);
+                                response.getWriter().println(fileContent);
+
+                                if ("timeConsume.html".equals(fileName)) {
+                                    ThreadUtil.sleep(1000);
                                 }
+                            } else {
+                                handle404(s, uri);
+                                return;
                             }
 
                             handle200(s, response);
