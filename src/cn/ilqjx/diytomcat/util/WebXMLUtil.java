@@ -1,5 +1,6 @@
 package cn.ilqjx.diytomcat.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import org.jsoup.Jsoup;
@@ -8,6 +9,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 用来获取某个 Context 下的欢迎文件名称
@@ -16,6 +19,7 @@ import java.io.File;
  * @create 2020-09-23 20:14
  */
 public class WebXMLUtil {
+    private static Map<String, String> mimeTypeMapping = new HashMap<>(); // 文件后缀名到 mime-type 的一个映射
 
     /**
      * 获取欢迎文件名
