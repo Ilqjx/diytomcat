@@ -41,4 +41,36 @@ public class WebXMLUtil {
         // 如果都找不到，默认返回 index.html
         return "index.html";
     }
+
+    /**
+     * 初始化 mimeTypeMapping
+     */
+    public static void initMimeType() {
+        String xml = FileUtil.readUtf8String(Constant.WEB_XML_FILE);
+        Document document = Jsoup.parse(xml);
+        Elements elements = document.select("mime-mapping");
+        for (Element element : elements) {
+            Element extension = element.select("extension").first();
+            Element mimeType = element.select("mime-type").first();
+            mimeTypeMapping.put(extension.text(), mimeType.text());
+        }
+    }
+
+    /**
+     * 获取后缀名对应的 mime-type
+     *
+     * @param extName 后缀名
+     * @return 后缀名对应的 mime-type
+     */
+    public static synchronized String getMimeType(String extName) {
+        if (mimeTypeMapping.isEmpty()) {
+            initMimeType();
+        }
+        String mimeType = mimeTypeMapping.get(extName);
+        if (mimeType == null) {
+            // 如果找不到后缀名对应的 mime-type，则返回 text/html
+            return "text/html";
+        }
+        return mimeType;
+    }
 }

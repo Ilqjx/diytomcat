@@ -11,8 +11,7 @@ import java.io.UnsupportedEncodingException;
 public class Response {
     // StringWriter: 把数据写入到 String 中去，内部提供 StringBuffer 保存数据
     private StringWriter stringWriter; // 用于存放返回的 html 文本
-    // 输出数据
-    private PrintWriter writer;
+    private PrintWriter writer; // 打印流
     private String contentType; // 内容类型
 
     public Response() {
@@ -36,6 +35,10 @@ public class Response {
 
     public PrintWriter getWriter() {
         return writer;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getContentType() {

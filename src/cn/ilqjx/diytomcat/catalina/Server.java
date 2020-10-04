@@ -83,6 +83,11 @@ public class Server {
                             String fileName = StrUtil.removePrefix(uri, "/");
                             File file = new File(context.getDocBase(), fileName);
                             if (file.exists()) {
+                                // 获取文件后缀名
+                                String extName = FileUtil.extName(file);
+                                String mimeType = WebXMLUtil.getMimeType(extName);
+                                response.setContentType(mimeType);
+
                                 // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
                                 String fileContent = FileUtil.readUtf8String(file);
                                 response.getWriter().println(fileContent);
