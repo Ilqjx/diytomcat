@@ -45,7 +45,7 @@ public class WebXMLUtil {
     /**
      * 初始化 mimeTypeMapping
      */
-    public static void initMimeType() {
+    private static void initMimeType() {
         String xml = FileUtil.readUtf8String(Constant.WEB_XML_FILE);
         Document document = Jsoup.parse(xml);
         Elements elements = document.select("mime-mapping");
