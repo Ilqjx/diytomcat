@@ -118,6 +118,49 @@ public class TestTomcat {
         containAssert(response, "Content-Type: text/plain");
     }
 
+    @Test
+    public void testPNG() {
+        byte[] bytes = getContentBytes("/pic.jpg");
+        int pngFileLength = 289436; // pic.jpg length = 289436k
+        Assert.assertEquals(pngFileLength, bytes.length);
+    }
+
+    @Test
+    public void testPDF() {
+        byte[] bytes = getContentBytes("/etf.pdf");
+        int pdfFileLength = 3590775; // etf.pdf length = 3590775k
+        Assert.assertEquals(pdfFileLength, bytes.length);
+    }
+
+    /**
+     * 以二进制形式获取 http 响应的内容
+     *
+     * @param uri
+     * @return
+     */
+    private byte[] getContentBytes(String uri) {
+        return getContentBytes(uri, false);
+    }
+
+    /**
+     * 以二进制形式获取 http 响应的内容
+     *
+     * @param uri
+     * @param gzip
+     * @return
+     */
+    private byte[] getContentBytes(String uri, boolean gzip) {
+        String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
+        byte[] bytes = MiniBrowser.getContentBytes(url, gzip);
+        return bytes;
+    }
+
+    /**
+     * 以字符串形式获取 http 响应的内容
+     *
+     * @param uri
+     * @return
+     */
     private String getContentString(String uri) {
         String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
         String content = MiniBrowser.getContentString(url);

@@ -151,7 +151,7 @@ public class MiniBrowser {
             // 接收服务器发送的信息
             InputStream is = client.getInputStream();
             // 将 is 接收到的信息转换为字节数组
-            result = readBytes(is);
+            result = readBytes(is, true);
             client.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,10 +168,11 @@ public class MiniBrowser {
      * 将输入流中的数据读取到字节数组中
      *
      * @param is
+     * @param fully 表示是否完全读取
      * @return
      * @throws IOException
      */
-    public static byte[] readBytes(InputStream is) throws IOException {
+    public static byte[] readBytes(InputStream is, boolean fully) throws IOException {
         int buffer_size = 1024;
         byte[] buffer = new byte[buffer_size];
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -180,9 +181,11 @@ public class MiniBrowser {
             if (length == -1) {
                 break;
             }
-            // 输出到内存中
+            // 写出到 buffer 数组中
             baos.write(buffer, 0, length);
-            if (length != buffer_size) {
+            // 在传输过程中，可能就不会一次传输 1024 个字节，有时候会小于这个字节数
+            // 有时候发送方不会发送完全，而是一点一点的发
+            if (!fully && length != buffer_size) {
                 break;
             }
         }

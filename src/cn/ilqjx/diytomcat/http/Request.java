@@ -70,12 +70,17 @@ public class Request {
 
     /**
      * 解析 http 请求
+     *
      * @throws IOException
      */
     private void parseHttpRequest() throws IOException {
         // 接收从浏览器发送过来的信息
         InputStream is = this.socket.getInputStream();
-        byte[] bytes = MiniBrowser.readBytes(is);
+        /*
+         fully 为 false 的原因：
+            因为浏览器使用长连接，发出的连接不会主动关闭，那么 Request 读取数据的时候就会卡在那里
+         */
+        byte[] bytes = MiniBrowser.readBytes(is, false);
         requestString = new String(bytes, "utf-8");
     }
 

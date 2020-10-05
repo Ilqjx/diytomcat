@@ -13,24 +13,13 @@ public class Response {
     private StringWriter stringWriter; // 用于存放返回的 html 文本
     private PrintWriter writer; // 打印流
     private String contentType; // 内容类型
+    private byte[] body; // 存放二进制文件
 
     public Response() {
         this.stringWriter = new StringWriter();
         // writer 写进来的数据最后都写到 stringWriter 中了
         this.writer = new PrintWriter(stringWriter);
         this.contentType = "text/html";
-    }
-
-    /**
-     * 返回 html 的字节数组
-     *
-     * @return
-     * @throws UnsupportedEncodingException
-     */
-    public byte[] getBody() throws UnsupportedEncodingException {
-        String content = stringWriter.toString();
-        byte[] body = content.getBytes("utf-8");
-        return body;
     }
 
     public PrintWriter getWriter() {
@@ -43,5 +32,17 @@ public class Response {
 
     public String getContentType() {
         return contentType;
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
+    }
+
+    public byte[] getBody() throws UnsupportedEncodingException {
+        if (body == null) {
+            String content = stringWriter.toString();
+            byte[] body = content.getBytes("utf-8");
+        }
+        return body;
     }
 }
