@@ -132,6 +132,13 @@ public class TestTomcat {
         Assert.assertEquals(pdfFileLength, bytes.length);
     }
 
+    @Test
+    public void testHello() {
+        String response = getContentString("/hello");
+        System.out.println(response);
+        Assert.assertEquals(response, "Hello DIY Tomcat from HelloServlet");
+    }
+
     /**
      * 以二进制形式获取 http 响应的内容
      *

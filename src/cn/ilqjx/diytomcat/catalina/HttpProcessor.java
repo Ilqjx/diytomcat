@@ -1,16 +1,13 @@
 package cn.ilqjx.diytomcat.catalina;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
-import cn.ilqjx.diytomcat.util.WebXMLUtil;
+import cn.ilqjx.diytomcat.webappservlet.HelloServlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -34,9 +31,15 @@ public class HttpProcessor {
                 throw new RuntimeException("this is a deliberately created exception");
             }
 
+            if ("/hello".equals(uri)) {
+                HelloServlet helloServlet = new HelloServlet();
+                helloServlet.doGet(request, response);
+            }
+
             // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
             // System.out.println("uri：" + request.getUri());
 
+            /*
             if ("/".equals(uri)) {
                 // 获取欢迎文件名
                 uri = WebXMLUtil.getWelcomeFile(context);
@@ -65,6 +68,7 @@ public class HttpProcessor {
                 handle404(socket, uri);
                 return;
             }
+            */
             handle200(socket, response);
         } catch (Exception e) {
             LogFactory.get().error(e);
