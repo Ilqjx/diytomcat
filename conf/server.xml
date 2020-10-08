@@ -3,6 +3,9 @@
 <Server>
     <!-- 代表 tomcat 提供的服务 -->
     <Service name="Catalina">
+        <Connector port="18080"></Connector>
+        <Connector port="18081"></Connector>
+        <Connector port="18082"></Connector>
         <!-- servlet 引擎，处理 servlet 请求 -->
         <!-- defaultHost="localhost" 表示默认的 Host 是 name="localhost" 的 Host -->
         <Engine defaultHost="localhost">

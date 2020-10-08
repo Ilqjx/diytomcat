@@ -1,6 +1,5 @@
 package cn.ilqjx.diytomcat.util;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import org.jsoup.Jsoup;
