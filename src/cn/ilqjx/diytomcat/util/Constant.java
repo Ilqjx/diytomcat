@@ -25,6 +25,7 @@ public class Constant {
     public static final File SERVER_XML_FILE = new File(CONF_FOLDER, "server.xml");
 
     public static final File WEB_XML_FILE = new File(CONF_FOLDER, "web.xml");
+    public static final File CONTEXT_XML_FILE = new File(CONF_FOLDER, "context.xml");
 
     // 404 文本响应
     public static final String TEXT_FORMAT_404 =
