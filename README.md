@@ -50,3 +50,5 @@ Server：Server 代表服务器本身。
 重构，把 Connector 中处理请求的代码分离出来。
 20. HelloServlet<br/>
 由浅至深开发 Servlet
+21. BaseRequest & BaseResponse<br/>
+实现接口之后，Request 和 Response 中出现了很多空方法，看着很不清爽，所以创建 BaseRequest 和 BaseResponse 来解决这个问题。
