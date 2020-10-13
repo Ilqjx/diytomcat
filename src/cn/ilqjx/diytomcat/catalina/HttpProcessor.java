@@ -1,23 +1,36 @@
 package cn.ilqjx.diytomcat.catalina;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
-import cn.ilqjx.diytomcat.webappservlet.HelloServlet;
+import cn.ilqjx.diytomcat.util.WebXMLUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
 /**
+ * 重构，把 Connector 中的代码分离出来
+ *
  * @author upfly
  * @create 2020-10-08 10:18
  */
 public class HttpProcessor {
 
+    /**
+     * 处理 socket 请求
+     *
+     * @param socket
+     * @param request
+     * @param response
+     */
     public void execute(Socket socket, Request request, Response response) {
         try {
             String uri = request.getUri();
@@ -26,49 +39,47 @@ public class HttpProcessor {
             }
 
             Context context = request.getContext();
+            String servletClassName = context.getServletClassName(uri);
 
-            if ("/500.html".equals(uri)) {
-                throw new RuntimeException("this is a deliberately created exception");
-            }
+            System.out.println("servletClassName: " + servletClassName);
 
-            if ("/hello".equals(uri)) {
-                HelloServlet helloServlet = new HelloServlet();
-                helloServlet.doGet(request, response);
-            }
-
-            // System.out.println("浏览器的输入信息：\r\n" + request.getRequestString());
-            // System.out.println("uri：" + request.getUri());
-
-            /*
-            if ("/".equals(uri)) {
-                // 获取欢迎文件名
-                uri = WebXMLUtil.getWelcomeFile(context);
-            }
-
-            String fileName = StrUtil.removePrefix(uri, "/");
-            File file = new File(context.getDocBase(), fileName);
-
-            if (file.exists()) {
-                // 获取文件后缀名，设置 content-type
-                String extName = FileUtil.extName(file);
-                String mimeType = WebXMLUtil.getMimeType(extName);
-                response.setContentType(mimeType);
-
-                byte[] body = FileUtil.readBytes(file);
-                response.setBody(body);
-
-                // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
-                // String fileContent = FileUtil.readUtf8String(file);
-                // response.getWriter().println(fileContent);
-
-                if ("timeConsume.html".equals(fileName)) {
-                    ThreadUtil.sleep(1000);
-                }
+            if (servletClassName != null) {
+                Object servletObject = ReflectUtil.newInstance(servletClassName);
+                ReflectUtil.invoke(servletObject, "doGet", request, response);
             } else {
-                handle404(socket, uri);
-                return;
+                if ("/500.html".equals(uri)) {
+                    throw new RuntimeException("this is a deliberately created exception");
+                }
+
+                if ("/".equals(uri)) {
+                    // 获取欢迎文件名
+                    uri = WebXMLUtil.getWelcomeFile(context);
+                }
+
+                String fileName = StrUtil.removePrefix(uri, "/");
+                File file = new File(context.getDocBase(), fileName);
+
+                if (file.exists()) {
+                    // 获取文件后缀名，设置 content-type
+                    String extName = FileUtil.extName(file);
+                    String mimeType = WebXMLUtil.getMimeType(extName);
+                    response.setContentType(mimeType);
+
+                    byte[] body = FileUtil.readBytes(file);
+                    response.setBody(body);
+
+                    // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
+                    // String fileContent = FileUtil.readUtf8String(file);
+                    // response.getWriter().println(fileContent);
+
+                    if ("timeConsume.html".equals(fileName)) {
+                        ThreadUtil.sleep(1000);
+                    }
+                } else {
+                    handle404(socket, uri);
+                    return;
+                }
             }
-            */
             handle200(socket, response);
         } catch (Exception e) {
             LogFactory.get().error(e);

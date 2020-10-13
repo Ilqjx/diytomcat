@@ -134,8 +134,7 @@ public class TestTomcat {
 
     @Test
     public void testHello() {
-        String response = getContentString("/hello");
-        System.out.println(response);
+        String response = getContentString("/j2ee/hello");
         Assert.assertEquals(response, "Hello DIY Tomcat from HelloServlet");
     }
 

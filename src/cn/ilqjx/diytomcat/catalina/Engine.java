@@ -17,6 +17,7 @@ public class Engine {
         this.service = service;
         this.defaultHost = ServerXMLUtil.getEngineDefaultHost();
         this.hosts = ServerXMLUtil.getHosts(this);
+
         checkDefault();
     }
 
