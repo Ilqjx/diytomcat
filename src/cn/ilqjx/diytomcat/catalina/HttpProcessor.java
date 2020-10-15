@@ -3,13 +3,13 @@ package cn.ilqjx.diytomcat.catalina;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
 import cn.ilqjx.diytomcat.util.Constant;
 import cn.ilqjx.diytomcat.util.WebXMLUtil;
+import cn.ilqjx.diytomcat.internalservlet.InvokerServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,11 +41,8 @@ public class HttpProcessor {
             Context context = request.getContext();
             String servletClassName = context.getServletClassName(uri);
 
-            System.out.println("servletClassName: " + servletClassName);
-
             if (servletClassName != null) {
-                Object servletObject = ReflectUtil.newInstance(servletClassName);
-                ReflectUtil.invoke(servletObject, "doGet", request, response);
+                InvokerServlet.getInstance().service(request, response);
             } else {
                 if ("/500.html".equals(uri)) {
                     throw new RuntimeException("this is a deliberately created exception");

@@ -20,6 +20,7 @@ public class Request extends BaseRequest {
     private Socket socket;
     private Context context;
     private Service service;
+    private String method; // http 请求中的 method
 
     public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
@@ -30,6 +31,7 @@ public class Request extends BaseRequest {
         }
         parseUri();
         parseContext();
+        parseMethod();
         if (!"/".equals(context.getPath())) {
             // 如果不是根路径，需要对 uri 进行修正
             // uri: /a/index.html，path: /a，uri 就应该是 /index.html
@@ -51,6 +53,20 @@ public class Request extends BaseRequest {
 
     public Context getContext() {
         return context;
+    }
+
+    @Override
+    public String getMethod() {
+        return method;
+    }
+
+    /**
+     * 解析 method
+     *
+     * @return
+     */
+    private void parseMethod() {
+        method = StrUtil.subBefore(requestString, " ", false);
     }
 
     /**

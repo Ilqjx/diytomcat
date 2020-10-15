@@ -61,7 +61,6 @@ public class Context {
     }
 
     public String getServletClassName(String uri) {
-        System.out.println("url_servletClassName: " + url_servletClassName);
         return url_servletClassName.get(uri);
     }
 
