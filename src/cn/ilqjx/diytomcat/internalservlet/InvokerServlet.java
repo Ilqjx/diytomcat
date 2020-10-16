@@ -4,6 +4,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
+import cn.ilqjx.diytomcat.util.Constant;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,5 +38,7 @@ public class InvokerServlet extends HttpServlet {
         根据 request 的 METHOD 来访问对应的 doGet() / doPost()
          */
         ReflectUtil.invoke(servletObject, "service", request, response);
+
+        response.setStatus(Constant.CODE_200); // 表示处理成功
     }
 }

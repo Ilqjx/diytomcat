@@ -14,6 +14,7 @@ public class Response extends BaseResponse {
     private PrintWriter writer; // 打印流
     private String contentType; // 内容类型
     private byte[] body; // 存放二进制文件
+    private int status; // 响应的状态码
 
     public Response() {
         this.stringWriter = new StringWriter();
@@ -45,5 +46,15 @@ public class Response extends BaseResponse {
             body = content.getBytes("utf-8");
         }
         return body;
+    }
+
+    @Override
+    public int getStatus() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -9,6 +9,11 @@ import java.io.File;
  * @create 2020-09-12 20:39
  */
 public class Constant {
+    public static final int CODE_200 = 200; // http 返回代码常量
+    public static final int CODE_302 = 302;
+    public static final int CODE_404 = 404;
+    public static final int CODE_500 = 500;
+
     public static final String RESPONSE_HEAD_200 =
             "HTTP/1.1 200 OK\r\n" + "Content-Type: {}\r\n\r\n"; // 200 头信息
     public static final String RESPONSE_HEAD_404 =

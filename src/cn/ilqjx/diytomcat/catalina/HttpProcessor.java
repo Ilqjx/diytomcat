@@ -1,17 +1,14 @@
 package cn.ilqjx.diytomcat.catalina;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.http.Response;
-import cn.ilqjx.diytomcat.util.Constant;
-import cn.ilqjx.diytomcat.util.WebXMLUtil;
+import cn.ilqjx.diytomcat.internalservlet.DefaultServlet;
 import cn.ilqjx.diytomcat.internalservlet.InvokerServlet;
+import cn.ilqjx.diytomcat.util.Constant;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -44,49 +41,30 @@ public class HttpProcessor {
             if (servletClassName != null) {
                 InvokerServlet.getInstance().service(request, response);
             } else {
-                if ("/500.html".equals(uri)) {
-                    throw new RuntimeException("this is a deliberately created exception");
-                }
-
-                if ("/".equals(uri)) {
-                    // 获取欢迎文件名
-                    uri = WebXMLUtil.getWelcomeFile(context);
-                }
-
-                String fileName = StrUtil.removePrefix(uri, "/");
-                File file = new File(context.getDocBase(), fileName);
-
-                if (file.exists()) {
-                    // 获取文件后缀名，设置 content-type
-                    String extName = FileUtil.extName(file);
-                    String mimeType = WebXMLUtil.getMimeType(extName);
-                    response.setContentType(mimeType);
-
-                    byte[] body = FileUtil.readBytes(file);
-                    response.setBody(body);
-
-                    // FileUtil.readUtf8String(file) 直接把文件的内容读出来赋给 fileContent
-                    // String fileContent = FileUtil.readUtf8String(file);
-                    // response.getWriter().println(fileContent);
-
-                    if ("timeConsume.html".equals(fileName)) {
-                        ThreadUtil.sleep(1000);
-                    }
-                } else {
-                    handle404(socket, uri);
-                    return;
-                }
+                DefaultServlet.getInstance().service(request, response);
             }
-            handle200(socket, response);
+
+            if (Constant.CODE_200 == response.getStatus()) {
+                handle200(socket, response);
+                return;
+            }
+            if (Constant.CODE_404 == response.getStatus()) {
+                handle404(socket, request.getUri());
+                return;
+            }
         } catch (Exception e) {
             LogFactory.get().error(e);
             // 当服务器内部抛出异常返回 500 响应
+            // 发生任何错误都按 500 处理的
             handle500(socket, e);
         } finally {
             try {
-                if (!socket.isClosed()) {
+                if (socket != null) {
                     socket.close();
                 }
+                // if (!socket.isClosed()) {
+                //     socket.close();
+                // }
             } catch (IOException e) {
                 e.printStackTrace();
             }
