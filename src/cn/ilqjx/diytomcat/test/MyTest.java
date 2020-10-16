@@ -1,5 +1,6 @@
 package cn.ilqjx.diytomcat.test;
 
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.util.Constant;
 import org.junit.Test;
@@ -11,6 +12,25 @@ import java.io.File;
  * @create 2020-09-14 19:21
  */
 public class MyTest {
+
+    @Test
+    public void test6() {
+        Object obj = Object.class;
+        System.out.println(obj);
+
+        Object obj2 = new Object();
+        System.out.println(obj2);
+        Class<?> clazz = obj2.getClass();
+
+        System.out.println(clazz.getName());
+        Object obj3 = ReflectUtil.newInstance(clazz.getName());
+        Object hashCode = ReflectUtil.invoke(obj3, "hashCode");
+        System.out.println(hashCode);
+
+        if (obj == clazz) {
+            System.out.println("equals");
+        }
+    }
 
     @Test
     public void test5() {
