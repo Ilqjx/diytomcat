@@ -2,6 +2,7 @@ package cn.ilqjx.diytomcat.test;
 
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.ilqjx.diytomcat.http.Request;
 import cn.ilqjx.diytomcat.util.Constant;
 import org.junit.Test;
 
@@ -12,6 +13,18 @@ import java.io.File;
  * @create 2020-09-14 19:21
  */
 public class MyTest {
+
+    @Test
+    public void test7() {
+        Class<Request> clazz = Request.class;
+        System.out.println(clazz);
+
+        ClassLoader loader = Object.class.getClassLoader();
+        System.out.println(loader);
+
+        ClassLoader loader1 = Request.class.getClassLoader();
+        System.out.println(loader1);
+    }
 
     @Test
     public void test6() {
