@@ -2,11 +2,8 @@ package cn.ilqjx.diytomcat.test;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import org.junit.Test;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * 类加载器：
@@ -21,6 +18,7 @@ public class CustomizedClassLoader extends ClassLoader {
     // user.dir: 获取工作目录（xxx/diytomcat）
     private File classesFolder = new File(System.getProperty("user.dir"), "classes_4_test");
 
+    // loadClass() 会调用 findClass()
     @Override
     protected Class<?> findClass(String fullQualifiedName) throws ClassNotFoundException {
         byte[] data = loadClassData(fullQualifiedName);
@@ -38,16 +36,5 @@ public class CustomizedClassLoader extends ClassLoader {
             throw new ClassNotFoundException(fullQualifiedName);
         }
         return FileUtil.readBytes(classFile);
-    }
-
-    @Test
-    public void test() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> clazz = findClass("cn.how2j.diytomcat.test.HOW2J");
-        Object obj = clazz.newInstance();
-        Method hello = clazz.getDeclaredMethod("hello");
-        hello.invoke(obj);
-
-        // ClassLoader classLoader = clazz.getClassLoader();
-        // System.out.println(classLoader); // cn.ilqjx.diytomcat.test.CustomizedClassLoader@29104a
     }
 }
