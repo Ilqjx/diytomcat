@@ -1,7 +1,5 @@
 package cn.ilqjx.diytomcat.classloader;
 
-import org.junit.Test;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,16 +30,5 @@ public class CommonClassLoader extends URLClassLoader {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-    }
-
-    @Test
-    public void test() throws ClassNotFoundException {
-        // Class<?> clazz = Class.forName("cn.hutool.aop.ProxyUtil");
-        // ClassLoader classLoader = clazz.getClassLoader();
-        // System.out.println(classLoader);
-
-        CommonClassLoader loader = new CommonClassLoader();
-        Class<?> clazz = loader.loadClass("cn.hutool.aop.ProxyUtil");
-        System.out.println(clazz.getClassLoader());
     }
 }
