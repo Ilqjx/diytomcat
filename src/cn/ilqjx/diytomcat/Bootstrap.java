@@ -12,13 +12,17 @@ public class Bootstrap {
 
     public static void main(String[] args) throws Exception {
         CommonClassLoader commonClassLoader = new CommonClassLoader();
+
         // getContextClassLoader(): 获取线程的上下文类加载器
         // setContextClassLoader(): 设置线程的上下文类加载器
         // 当前线程加载任何类都会使用 CommonClassLoader 这个类加载器
         Thread.currentThread().setContextClassLoader(commonClassLoader);
+
         String serverClassName = "cn.ilqjx.diytomcat.catalina.Server";
         Class<?> serverClazz = commonClassLoader.loadClass(serverClassName);
-        System.out.println(serverClazz.getClassLoader());
+
+        System.out.println("serverClazz' classloader: " + serverClazz.getClassLoader());
+
         Object serverObject = serverClazz.newInstance();
         Method startMethod = serverClazz.getMethod("start");
         startMethod.invoke(serverObject);

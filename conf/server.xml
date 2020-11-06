@@ -12,6 +12,7 @@
             <!-- Host 虚拟主机 -->
             <Host name="localhost">
                 <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
+                <Context path="/javaweb" docBase="d:\project\idea\javawebdemo\web" />
             </Host>
         </Engine>
     </Service>

@@ -116,7 +116,7 @@ public class Request extends BaseRequest {
      * 解析 uri
      */
     private void parseUri() {
-        // 可能带参数的uri -> /index.html?name=gareen、/index.html
+        // 可能带参数的 uri -> /index.html?name=gareen、/index.html
         String temp = StrUtil.subBetween(requestString, " ", " ");
         // 不带参数，没有 ? 就是不带参数
         if (!StrUtil.contains(temp, '?')) {

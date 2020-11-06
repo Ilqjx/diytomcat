@@ -138,6 +138,12 @@ public class TestTomcat {
         Assert.assertEquals(response, "Hello DIY Tomcat from HelloServlet");
     }
 
+    @Test
+    public void testJavaWeb() {
+        String response = getContentString("/javaweb/hello");
+        Assert.assertEquals(response, "Hello DIY Tomcat from HelloServlet@javaweb");
+    }
+
     /**
      * 以二进制形式获取 http 响应的内容
      *

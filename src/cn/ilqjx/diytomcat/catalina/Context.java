@@ -5,6 +5,7 @@ import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
+import cn.ilqjx.diytomcat.classloader.WebappClassLoader;
 import cn.ilqjx.diytomcat.exception.WebConfigDuplicatedException;
 import cn.ilqjx.diytomcat.util.ContextXMLUtil;
 import org.jsoup.Jsoup;
@@ -16,7 +17,7 @@ import java.io.File;
 import java.util.*;
 
 /**
- * 存放 Servlet 的映射信息
+ * 扫描 web.xml，存放 Servlet 的映射信息
  *
  * @author upfly
  * @create 2020-09-18 19:19
@@ -25,6 +26,7 @@ public class Context {
     private String path; // 访问的路径
     private String docBase; // 对应在文件系统中的位置
     private File contextWebXmlFile; // 对应 xxx/WEB-INF/web.xml
+    private WebappClassLoader webappClassLoader; // 每个 web 应用都有自己的 WebappClassLoader
 
     // 不同的 Context 对应不同的 web 应用，每个 Context 下面都有自己的映射关系
     private Map<String, String> url_servletClassName; // 地址对应 Servlet 的类名
@@ -40,6 +42,10 @@ public class Context {
         this.url_servletName = new HashMap<>();
         this.servletName_className = new HashMap<>();
         this.className_servletName = new HashMap<>();
+
+        // 获取的是 Bootstrap 类中设置的 CommonClassLoader
+        ClassLoader commonClassLoader = Thread.currentThread().getContextClassLoader();
+        this.webappClassLoader = new WebappClassLoader(docBase, commonClassLoader);
 
         deploy();
     }
@@ -62,6 +68,10 @@ public class Context {
 
     public String getServletClassName(String uri) {
         return url_servletClassName.get(uri);
+    }
+
+    public WebappClassLoader getWebappClassLoader() {
+        return webappClassLoader;
     }
 
     /**
