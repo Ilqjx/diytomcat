@@ -17,6 +17,10 @@ import java.util.List;
  */
 public class WebappClassLoader extends URLClassLoader {
 
+    /**
+     * @param docBase 项目目录
+     * @param commonClassLoader 公共类加载器
+     */
     public WebappClassLoader(String docBase, ClassLoader commonClassLoader) {
         super(new URL[] {}, commonClassLoader);
 

@@ -21,8 +21,6 @@ public class Bootstrap {
         String serverClassName = "cn.ilqjx.diytomcat.catalina.Server";
         Class<?> serverClazz = commonClassLoader.loadClass(serverClassName);
 
-        System.out.println("serverClazz' classloader: " + serverClazz.getClassLoader());
-
         Object serverObject = serverClazz.newInstance();
         Method startMethod = serverClazz.getMethod("start");
         startMethod.invoke(serverObject);

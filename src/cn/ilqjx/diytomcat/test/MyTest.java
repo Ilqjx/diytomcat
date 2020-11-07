@@ -15,6 +15,10 @@ import java.io.File;
 public class MyTest {
 
     @Test
+    public void test8() {
+    }
+
+    @Test
     public void test7() {
         Class<Request> clazz = Request.class;
         System.out.println(clazz);

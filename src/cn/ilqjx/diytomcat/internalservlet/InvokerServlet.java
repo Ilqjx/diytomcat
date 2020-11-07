@@ -42,8 +42,8 @@ public class InvokerServlet extends HttpServlet {
              调用目标 Servlet 的 service()
              因为目标 Servlet 也继承了 HttpServlet，从而提供了 service()，然后
              根据 request 的 METHOD 来访问对应的 doGet() / doPost()
-             */
-            ReflectUtil.invoke(servletObject, "service", request, response);
+             */ReflectUtil
+            .invoke(servletObject, "service", request, response);
             response.setStatus(Constant.CODE_200); // 表示处理成功
         } catch (ClassNotFoundException e) {
             throw new RuntimeException();
