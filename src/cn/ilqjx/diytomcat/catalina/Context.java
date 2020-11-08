@@ -8,6 +8,7 @@ import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.classloader.WebappClassLoader;
 import cn.ilqjx.diytomcat.exception.WebConfigDuplicatedException;
 import cn.ilqjx.diytomcat.util.ContextXMLUtil;
+import cn.ilqjx.diytomcat.watcher.ContextFileChangeWatcher;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,7 +27,12 @@ public class Context {
     private String path; // 访问的路径
     private String docBase; // 对应在文件系统中的位置
     private File contextWebXmlFile; // 对应 xxx/WEB-INF/web.xml
+
     private WebappClassLoader webappClassLoader; // 每个 web 应用都有自己的 WebappClassLoader
+
+    private Host host; // 主机
+    private boolean reloadable; // 是否启用热加载
+    private ContextFileChangeWatcher contextFileChangeWatcher; // 文件监听器
 
     // 不同的 Context 对应不同的 web 应用，每个 Context 下面都有自己的映射关系
     private Map<String, String> url_servletClassName; // 地址对应 Servlet 的类名
@@ -34,9 +40,14 @@ public class Context {
     private Map<String, String> servletName_className; // Servlet 名称对应类名
     private Map<String, String> className_servletName; // Servlet 类名对应名称
 
-    public Context(String path, String docBase) {
+    public Context(String path, String docBase, Host host, boolean reloadable) {
+        TimeInterval timeInterval = DateUtil.timer();
+        LogFactory.get().info("Deploying web application directory {}", docBase);
+
         this.path = path;
         this.docBase = docBase;
+        this.host = host;
+        this.reloadable = reloadable;
         this.contextWebXmlFile = new File(docBase, ContextXMLUtil.getWatchedResource());
         this.url_servletClassName = new HashMap<>();
         this.url_servletName = new HashMap<>();
@@ -48,6 +59,7 @@ public class Context {
         this.webappClassLoader = new WebappClassLoader(docBase, commonClassLoader);
 
         deploy();
+        LogFactory.get().info("Deployment of web application directory {} has finished in {} ms", this.docBase, timeInterval.intervalMs());
     }
 
     public String getPath() {
@@ -72,6 +84,14 @@ public class Context {
 
     public WebappClassLoader getWebappClassLoader() {
         return webappClassLoader;
+    }
+
+    public boolean isReloadable() {
+        return reloadable;
+    }
+
+    public void setReloadable(boolean reloadable) {
+        this.reloadable = reloadable;
     }
 
     /**
@@ -166,13 +186,22 @@ public class Context {
         parseServletMapping(document);
     }
 
-    /**
-     * 打印日志
-     */
     private void deploy() {
-        TimeInterval timeInterval = DateUtil.timer();
-        LogFactory.get().info("Deploying web application directory {}", this.docBase);
         init();
-        LogFactory.get().info("Deployment of web application directory {} has finished in {} ms", this.docBase, timeInterval.intervalMs());
+        if (reloadable) {
+            // 创建监听器
+            this.contextFileChangeWatcher = new ContextFileChangeWatcher(this);
+            // 启动监听器
+            contextFileChangeWatcher.start();
+        }
+    }
+
+    public void stop() {
+        webappClassLoader.stop();
+        contextFileChangeWatcher.close();
+    }
+
+    public void reload() {
+        host.reload(this);
     }
 }

@@ -11,8 +11,9 @@
         <Engine defaultHost="localhost">
             <!-- Host 虚拟主机 -->
             <Host name="localhost">
+                <!-- Context 表示一个 web 应用 -->
                 <Context path="/b" docBase="d:\project\idea\diytomcat\b" />
-                <Context path="/javaweb" docBase="d:\project\idea\javawebdemo\web" />
+                <Context path="/javaweb" docBase="d:\project\idea\javawebdemo\web" reloadable="true" />
             </Host>
         </Engine>
     </Service>

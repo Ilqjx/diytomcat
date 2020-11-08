@@ -1,5 +1,6 @@
 package cn.ilqjx.diytomcat.catalina;
 
+import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.util.Constant;
 import cn.ilqjx.diytomcat.util.ServerXMLUtil;
 
@@ -60,7 +61,7 @@ public class Host {
         }
 
         String docBase = folder.getAbsolutePath();
-        Context context = new Context(path, docBase);
+        Context context = new Context(path, docBase, this, true);
 
         contextMap.put(context.getPath(), context);
     }
@@ -69,7 +70,7 @@ public class Host {
      * 扫描 server.xml文件里的　Context
      */
     private void scanContextsInServerXML() {
-        List<Context> contexts = ServerXMLUtil.getContexts();
+        List<Context> contexts = ServerXMLUtil.getContexts(this);
         for (Context context : contexts) {
             contextMap.put(context.getPath(), context);
         }
@@ -83,5 +84,25 @@ public class Host {
      */
     public Context getContext(String path) {
         return contextMap.get(path);
+    }
+
+    /**
+     * 重载一个 Context，通过原有的信息创建一个新的 Context 对象
+     *
+     * 可以根据发生变化的文件 jar、class、xml 进行单独的处理，而不重新创建 Context 对象
+     *
+     * @param context
+     */
+    public void reload(Context context) {
+        LogFactory.get().info("Reloading Context with name [{}] has started", context.getPath());
+        String path = context.getPath();
+        String docBase = context.getDocBase();
+        boolean reloadable = context.isReloadable();
+
+        context.stop();
+
+        Context newContext = new Context(path, docBase, this, reloadable);
+        contextMap.put(path, newContext);
+        LogFactory.get().info("Reloading Context with name [{}] has completed", path);
     }
 }

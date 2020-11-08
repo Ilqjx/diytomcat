@@ -16,6 +16,7 @@ public class MyTest {
 
     @Test
     public void test8() {
+        System.out.println(MyTest.this);
     }
 
     @Test
