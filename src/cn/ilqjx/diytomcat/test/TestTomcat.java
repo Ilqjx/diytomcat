@@ -141,7 +141,14 @@ public class TestTomcat {
     @Test
     public void testJavaWeb() {
         String response = getContentString("/javaweb/hello");
-        Assert.assertEquals(response, "Hello DIY Tomcat from HelloServlet@javaweb");
+        containAssert(response, "Hello DIY Tomcat from HelloServlet@javaweb");
+    }
+
+    @Test
+    public void testJavaWebSingleton() {
+        String response1 = getContentString("/javaweb/hello");
+        String response2 = getContentString("/javaweb/hello");
+        Assert.assertEquals(response1, response2);
     }
 
     /**

@@ -6,6 +6,7 @@ import cn.ilqjx.diytomcat.catalina.Engine;
 import cn.ilqjx.diytomcat.catalina.Service;
 import cn.ilqjx.diytomcat.util.MiniBrowser;
 
+import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
@@ -21,6 +22,7 @@ public class Request extends BaseRequest {
     private Context context;
     private Service service;
     private String method; // http 请求中的 method
+    private ServletContext servletContext;
 
     public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
@@ -60,6 +62,16 @@ public class Request extends BaseRequest {
         return method;
     }
 
+    @Override
+    public ServletContext getServletContext() {
+        return context.getServletContext();
+    }
+
+    @Override
+    public String getRealPath(String path) {
+        return getServletContext().getRealPath(path);
+    }
+
     /**
      * 解析 method
      *
@@ -89,6 +101,7 @@ public class Request extends BaseRequest {
             path = "/" + path;
         }
 
+        // 根据 path 返回对应的 context
         context = engine.getDefaultHost().getContext(path);
         // 如果 context 为 null，说明访问了一个不存在的路径，跳转到根路径
         if (context == null) {

@@ -36,7 +36,8 @@ public class InvokerServlet extends HttpServlet {
         try {
             // 必须调用类加载器进行加载，因为没有类加载器对其加载
             Class<?> servletClazz = context.getWebappClassLoader().loadClass(servletClassName);
-            Object servletObject = ReflectUtil.newInstance(servletClazz);
+            // Object servletObject = ReflectUtil.newInstance(servletClazz);
+            Object servletObject = context.getServlet(servletClazz);
 
             /*
              调用目标 Servlet 的 service()，因为目标 Servlet 也继承了 HttpServlet，
@@ -46,6 +47,10 @@ public class InvokerServlet extends HttpServlet {
             response.setStatus(Constant.CODE_200); // 表示处理成功
         } catch (ClassNotFoundException e) {
             throw new RuntimeException();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
         }
     }
 }

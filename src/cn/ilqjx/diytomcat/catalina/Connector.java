@@ -54,19 +54,31 @@ public class Connector implements Runnable {
                 // 监听 port 端口，看是否有连接请求过来
                 Socket socket = ss.accept();
 
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Request request = new Request(socket, service);
-                            Response response = new Response();
-                            HttpProcessor httpProcessor = new HttpProcessor();
-                            httpProcessor.execute(socket, request, response);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                Runnable runnable = () -> {
+                    try {
+                        Request request = new Request(socket, service);
+                        Response response = new Response();
+                        HttpProcessor httpProcessor = new HttpProcessor();
+                        httpProcessor.execute(socket, request, response);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 };
+
+                // Runnable runnable = new Runnable() {
+                //     @Override
+                //     public void run() {
+                //         try {
+                //             Request request = new Request(socket, service);
+                //             Response response = new Response();
+                //             HttpProcessor httpProcessor = new HttpProcessor();
+                //             httpProcessor.execute(socket, request, response);
+                //         } catch (IOException e) {
+                //             e.printStackTrace();
+                //         }
+                //     }
+                // };
+
                 ThreadPoolUtil.run(runnable);
             }
         } catch (IOException e) {

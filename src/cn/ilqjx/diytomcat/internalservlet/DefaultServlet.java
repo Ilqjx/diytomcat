@@ -1,7 +1,6 @@
 package cn.ilqjx.diytomcat.internalservlet;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.http.Request;
@@ -46,7 +45,8 @@ public class DefaultServlet extends HttpServlet {
         }
 
         String fileName = StrUtil.removePrefix(uri, "/");
-        File file = new File(context.getDocBase(), fileName);
+        // request.getRealPath(fileName) 根据文件名获取绝对路径
+        File file = new File(request.getRealPath(fileName));
 
         if (file.exists()) {
             // 获取文件后缀名，设置 content-type
@@ -61,9 +61,9 @@ public class DefaultServlet extends HttpServlet {
             // String fileContent = FileUtil.readUtf8String(file);
             // response.getWriter().println(fileContent);
 
-            if ("timeConsume.html".equals(fileName)) {
-                ThreadUtil.sleep(1000);
-            }
+            // if ("timeConsume.html".equals(fileName)) {
+            //     ThreadUtil.sleep(1000);
+            // }
 
             response.setStatus(Constant.CODE_200);
         } else {

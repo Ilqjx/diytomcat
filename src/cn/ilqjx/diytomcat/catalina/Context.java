@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.classloader.WebappClassLoader;
 import cn.ilqjx.diytomcat.exception.WebConfigDuplicatedException;
+import cn.ilqjx.diytomcat.http.ApplicationContext;
 import cn.ilqjx.diytomcat.util.ContextXMLUtil;
 import cn.ilqjx.diytomcat.watcher.ContextFileChangeWatcher;
 import org.jsoup.Jsoup;
@@ -14,6 +15,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.util.*;
 
@@ -34,6 +37,10 @@ public class Context {
     private boolean reloadable; // 是否启用热加载
     private ContextFileChangeWatcher contextFileChangeWatcher; // 文件监听器
 
+    private ServletContext servletContext;
+
+    private Map<Class<?>, HttpServlet> servletPool; // 存放 Servlet 对象
+
     // 不同的 Context 对应不同的 web 应用，每个 Context 下面都有自己的映射关系
     private Map<String, String> url_servletClassName; // 地址对应 Servlet 的类名
     private Map<String, String> url_servletName; // 地址对应 Servlet 的名称
@@ -49,10 +56,14 @@ public class Context {
         this.host = host;
         this.reloadable = reloadable;
         this.contextWebXmlFile = new File(docBase, ContextXMLUtil.getWatchedResource());
+
         this.url_servletClassName = new HashMap<>();
         this.url_servletName = new HashMap<>();
         this.servletName_className = new HashMap<>();
         this.className_servletName = new HashMap<>();
+
+        this.servletContext = new ApplicationContext(this);
+        this.servletPool = new HashMap<>();
 
         // 获取的是 Bootstrap 类中设置的 CommonClassLoader
         ClassLoader commonClassLoader = Thread.currentThread().getContextClassLoader();
@@ -92,6 +103,31 @@ public class Context {
 
     public void setReloadable(boolean reloadable) {
         this.reloadable = reloadable;
+    }
+
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    /**
+     * 根据 Class 实例返回 HttpServlet 的实例
+     *
+     * @param clazz
+     * @return
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    public HttpServlet getServlet(Class<?> clazz) throws IllegalAccessException, InstantiationException {
+        HttpServlet servlet = servletPool.get(clazz);
+        if (servlet == null) {
+            synchronized (this) {
+                if (servlet == null) {
+                    servlet = (HttpServlet) clazz.newInstance();
+                    servletPool.put(clazz, servlet);
+                }
+            }
+        }
+        return servlet;
     }
 
     /**

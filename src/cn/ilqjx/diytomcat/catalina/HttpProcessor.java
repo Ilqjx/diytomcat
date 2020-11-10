@@ -39,8 +39,10 @@ public class HttpProcessor {
             String servletClassName = context.getServletClassName(uri);
 
             if (servletClassName != null) {
+                // 处理 servlet
                 InvokerServlet.getInstance().service(request, response);
             } else {
+                // 处理文件
                 DefaultServlet.getInstance().service(request, response);
             }
 
