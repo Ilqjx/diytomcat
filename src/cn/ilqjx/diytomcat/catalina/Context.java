@@ -44,6 +44,8 @@ public class Context {
 
     private Map<Class<?>, HttpServlet> servletPool; // 存放 Servlet 对象
 
+    private List<String> loadOnStartupServletClassNames; // 自启动的 servlet 的全限定类名
+
     // 不同的 Context 对应不同的 web 应用，每个 Context 下面都有自己的映射关系
     private Map<String, String> url_servletClassName; // 地址对应 Servlet 的类名
     private Map<String, String> url_servletName; // 地址对应 Servlet 的名称
@@ -69,6 +71,8 @@ public class Context {
         this.servletContext = new ApplicationContext(this);
         this.servletPool = new HashMap<>();
         this.servletClassName_initParams = new HashMap<>();
+
+        this.loadOnStartupServletClassNames = new ArrayList<>();
 
         // 获取的是 Bootstrap 类中设置的 CommonClassLoader
         ClassLoader commonClassLoader = Thread.currentThread().getContextClassLoader();
@@ -112,6 +116,41 @@ public class Context {
 
     public ServletContext getServletContext() {
         return servletContext;
+    }
+
+    /**
+     * 解析自启动 servlet
+     *
+     * @param document
+     */
+    private void parseLoadOnStartup(Document document) {
+        Elements loadOnStartupElements = document.select("load-on-startup");
+
+        if (loadOnStartupElements.isEmpty()) {
+            return;
+        }
+
+        for (Element element : loadOnStartupElements) {
+            Element selectClassElement = element.parent().select("servlet-class").get(0);
+            loadOnStartupServletClassNames.add(selectClassElement.text());
+        }
+    }
+
+    /**
+     * 处理自启动 servlet
+     * servlet 自启动就是 Tomcat 启动的时候自动加载 servlet，再具体一点就是
+     * Context 启动的时候对需要自启动的 Servlet 进行初始化
+     */
+    private void handleLoadOnStartup() {
+        try {
+            for (String className : loadOnStartupServletClassNames) {
+                Class<?> clazz = webappClassLoader.loadClass(className);
+                getServlet(clazz);
+            }
+        } catch (ClassNotFoundException | IllegalAccessException |
+                InstantiationException | ServletException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -268,8 +307,12 @@ public class Context {
 
         String xml = FileUtil.readUtf8String(contextWebXmlFile);
         Document document = Jsoup.parse(xml);
+
         parseServletMapping(document);
         parseServletInitParams(document);
+
+        parseLoadOnStartup(document);
+        handleLoadOnStartup();
     }
 
     private void deploy() {

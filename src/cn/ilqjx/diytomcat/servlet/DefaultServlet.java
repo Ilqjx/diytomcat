@@ -1,4 +1,4 @@
-package cn.ilqjx.diytomcat.internalservlet;
+package cn.ilqjx.diytomcat.servlet;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
