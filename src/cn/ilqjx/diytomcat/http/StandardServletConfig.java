@@ -5,7 +5,8 @@ import javax.servlet.ServletContext;
 import java.util.*;
 
 /**
- * ServletConfig 是 Servlet 初始化的时候，传进去的参数对象
+ * ServletConfig 是 Servlet 初始化的时候，传进去的参数
+ * public void init(ServletConfig config) {}
  *
  * @author upfly
  * @create 2020-11-10 20:09

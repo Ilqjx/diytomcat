@@ -8,6 +8,7 @@ import cn.hutool.log.LogFactory;
 import cn.ilqjx.diytomcat.classloader.WebappClassLoader;
 import cn.ilqjx.diytomcat.exception.WebConfigDuplicatedException;
 import cn.ilqjx.diytomcat.http.ApplicationContext;
+import cn.ilqjx.diytomcat.http.StandardServletConfig;
 import cn.ilqjx.diytomcat.util.ContextXMLUtil;
 import cn.ilqjx.diytomcat.watcher.ContextFileChangeWatcher;
 import org.jsoup.Jsoup;
@@ -15,7 +16,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import java.io.File;
 import java.util.*;
@@ -46,6 +49,7 @@ public class Context {
     private Map<String, String> url_servletName; // 地址对应 Servlet 的名称
     private Map<String, String> servletName_className; // Servlet 名称对应类名
     private Map<String, String> className_servletName; // Servlet 类名对应名称
+    private Map<String, Map<String, String>> servletClassName_initParams; // Servlet 全限定类名对应初始化参数
 
     public Context(String path, String docBase, Host host, boolean reloadable) {
         TimeInterval timeInterval = DateUtil.timer();
@@ -64,6 +68,7 @@ public class Context {
 
         this.servletContext = new ApplicationContext(this);
         this.servletPool = new HashMap<>();
+        this.servletClassName_initParams = new HashMap<>();
 
         // 获取的是 Bootstrap 类中设置的 CommonClassLoader
         ClassLoader commonClassLoader = Thread.currentThread().getContextClassLoader();
@@ -110,6 +115,38 @@ public class Context {
     }
 
     /**
+     * 解析初始化参数
+     *
+     * @param document
+     */
+    private void parseServletInitParams(Document document) {
+        Elements servletElements = document.select("servlet");
+        for (Element servletElement : servletElements) {
+            Elements servletClassElement = servletElement.select("servlet-class");
+            String servletClassName = servletClassElement.text();
+
+            Elements initParamElements = servletElement.select("init-param");
+
+            if (initParamElements.isEmpty()) {
+                continue;
+            }
+
+            Map<String, String> initParams = new HashMap<>();
+            for (Element initParamElement : initParamElements) {
+                Element nameElement = initParamElement.select("param-name").first();
+                Element valueElement = initParamElement.select("param-value").first();
+
+                String name = nameElement.text();
+                String value = valueElement.text();
+
+                initParams.put(name, value);
+            }
+
+            servletClassName_initParams.put(servletClassName, initParams);
+        }
+    }
+
+    /**
      * 根据 Class 实例返回 HttpServlet 的实例
      *
      * @param clazz
@@ -117,12 +154,24 @@ public class Context {
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
-    public HttpServlet getServlet(Class<?> clazz) throws IllegalAccessException, InstantiationException {
+    public HttpServlet getServlet(Class<?> clazz) throws IllegalAccessException, InstantiationException, ServletException {
         HttpServlet servlet = servletPool.get(clazz);
         if (servlet == null) {
             synchronized (this) {
                 if (servlet == null) {
+                    // servlet 实例化
                     servlet = (HttpServlet) clazz.newInstance();
+
+                    // servlet 初始化
+                    ServletContext servletContext = this.getServletContext();
+                    String className = clazz.getName();
+                    String servletName = className_servletName.get(className);
+                    Map<String, String> initParams = servletClassName_initParams.get(className);
+
+                    ServletConfig servletConfig = new StandardServletConfig(servletContext, servletName, initParams);
+
+                    servlet.init(servletConfig);
+
                     servletPool.put(clazz, servlet);
                 }
             }
@@ -220,6 +269,7 @@ public class Context {
         String xml = FileUtil.readUtf8String(contextWebXmlFile);
         Document document = Jsoup.parse(xml);
         parseServletMapping(document);
+        parseServletInitParams(document);
     }
 
     private void deploy() {
@@ -232,9 +282,20 @@ public class Context {
         }
     }
 
+    /**
+     * 销毁 servlet
+     */
+    private void destroyServlets() {
+        Collection<HttpServlet> servlets = servletPool.values();
+        for (HttpServlet servlet: servlets) {
+            servlet.destroy();
+        }
+    }
+
     public void stop() {
         webappClassLoader.stop();
         contextFileChangeWatcher.close();
+        destroyServlets();
     }
 
     public void reload() {

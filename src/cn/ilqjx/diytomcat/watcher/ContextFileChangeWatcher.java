@@ -48,19 +48,16 @@ public class ContextFileChangeWatcher {
             @Override
             public void onCreate(WatchEvent<?> watchEvent, Path path) {
                 dealWith(watchEvent);
-                System.out.println("创建: " + watchEvent.context().toString());
             }
 
             @Override
             public void onModify(WatchEvent<?> watchEvent, Path path) {
                 dealWith(watchEvent);
-                System.out.println("修改: " + watchEvent.context().toString());
             }
 
             @Override
             public void onDelete(WatchEvent<?> watchEvent, Path path) {
                 dealWith(watchEvent);
-                System.out.println("删除: " + watchEvent.context().toString());
             }
 
             /**
@@ -72,7 +69,6 @@ public class ContextFileChangeWatcher {
             @Override
             public void onOverflow(WatchEvent<?> watchEvent, Path path) {
                 dealWith(watchEvent);
-                System.out.println("丢失: " + watchEvent.context().toString());
             }
         });
 
