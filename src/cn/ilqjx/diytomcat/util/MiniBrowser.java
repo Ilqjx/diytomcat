@@ -1,5 +1,7 @@
 package cn.ilqjx.diytomcat.util;
 
+import cn.hutool.http.HttpUtil;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -15,8 +17,14 @@ import java.util.Set;
  */
 public class MiniBrowser {
 
+    /**
+     * 返回字符串的 http 响应内容
+     *
+     * @param url
+     * @return
+     */
     public static String getContentString(String url) {
-        return getContentString(url, false);
+        return getContentString(url, false, null, true);
     }
 
     /**
@@ -27,7 +35,30 @@ public class MiniBrowser {
      * @return
      */
     public static String getContentString(String url, boolean gzip) {
-        byte[] result = getContentBytes(url, gzip);
+        return getContentString(url, gzip, null, true);
+    }
+
+    /**
+     * 返回字符串的 http 响应内容
+     *
+     * @param url
+     * @param params
+     * @param isGet
+     * @return
+     */
+    public static String getContentString(String url, Map<String, Object> params, boolean isGet) {
+        return getContentString(url, false, params, isGet);
+    }
+
+    /**
+     * 返回字符串的 http 响应内容
+     *
+     * @param url
+     * @param gzip
+     * @return
+     */
+    public static String getContentString(String url, boolean gzip, Map<String, Object> params, boolean isGet) {
+        byte[] result = getContentBytes(url, gzip, params, isGet);
         if (result == null) {
             return null;
         }
@@ -38,8 +69,14 @@ public class MiniBrowser {
         }
     }
 
+    /**
+     * 返回二进制的 http 响应内容
+     *
+     * @param url
+     * @return
+     */
     public static byte[] getContentBytes(String url) {
-        return getContentBytes(url, false);
+        return getContentBytes(url, false, null, true);
     }
 
     /**
@@ -50,7 +87,30 @@ public class MiniBrowser {
      * @return
      */
     public static byte[] getContentBytes(String url, boolean gzip) {
-        byte[] response = getHttpBytes(url, gzip);
+        return getContentBytes(url, gzip, null, true);
+    }
+
+    /**
+     * 返回二进制的 http 响应内容
+     *
+     * @param url
+     * @param params
+     * @param isGet
+     * @return
+     */
+    public static byte[] getContentBytes(String url, Map<String,Object> params, boolean isGet) {
+        return getContentBytes(url, false, params, isGet);
+    }
+
+    /**
+     * 返回二进制的 http 响应内容
+     *
+     * @param url
+     * @param gzip
+     * @return
+     */
+    public static byte[] getContentBytes(String url, boolean gzip, Map<String, Object> params, boolean isGet) {
+        byte[] response = getHttpBytes(url, gzip, params, isGet);
         byte[] doubleReturn = "\r\n\r\n".getBytes();
 
         int pos = -1;
@@ -81,33 +141,63 @@ public class MiniBrowser {
      * @return
      */
     public static String getHttpString(String url) {
-        return getHttpString(url, false);
+        return getHttpString(url, false, null, true);
     }
 
     /**
      * 返回字符串的 http 响应
      *
      * @param url
+     * @param gzip
      * @return
      */
     public static String getHttpString(String url, boolean gzip) {
-        byte[] httpBytes = getHttpBytes(url, gzip);
-        return new String(httpBytes).trim();
+        return getHttpString(url, gzip, null, true);
+    }
+
+    /**
+     * 返回字符串的 http 响应
+     *
+     * @param url
+     * @param params
+     * @param isGet
+     * @return
+     */
+    public static String getHttpString(String url, Map<String,Object> params, boolean isGet) {
+        return getHttpString(url, false, params, isGet);
+    }
+
+    /**
+     * 返回字符串的 http 响应
+     *
+     * @param url
+     * @param gzip
+     * @param params
+     * @param isGet
+     * @return
+     */
+    public static String getHttpString(String url, boolean gzip, Map<String,Object> params, boolean isGet) {
+        byte[] bytes = getHttpBytes(url, gzip, params, isGet);
+        return new String(bytes).trim();
     }
 
     /**
      * 返回二进制的 http 响应
      *
-     * @param url
+     * @param url 请求的资源路径
      * @param gzip 是否获取压缩后的数据
+     * @param params 请求参数
+     * @param isGet 是否是 GET 请求
      * @return
      */
-    public static byte[] getHttpBytes(String url, boolean gzip) {
+    public static byte[] getHttpBytes(String url, boolean gzip, Map<String, Object> params, boolean isGet) {
+        String method = isGet ? "GET" : "POST";
         byte[] result = null;
         try {
             URL u = new URL(url);
             Socket client = new Socket();
             int port = u.getPort();
+            // -1 是什么鬼？？？
             if (port == -1) {
                 port = 80;
             }
@@ -134,7 +224,16 @@ public class MiniBrowser {
                 path = "/";
             }
 
-            String firstLine = "GET " + path + " HTTP/1.1\r\n";
+            String paramsString = "";
+            if (params != null) {
+                paramsString = HttpUtil.toParams(params);
+            }
+
+            if (isGet) {
+                path = path + "?" + paramsString;
+            }
+
+            String firstLine = method + " " + path + " HTTP/1.1\r\n";
 
             StringBuffer httpRequestString = new StringBuffer();
             httpRequestString.append(firstLine);
@@ -142,6 +241,12 @@ public class MiniBrowser {
             for (String header : headers) {
                 String headerLine = header + ":" + requestHeaders.get(header) + "\r\n";
                 httpRequestString.append(headerLine);
+            }
+
+            // POST 请求的参数放在请求体中
+            if (!isGet) {
+                httpRequestString.append("\r\n");
+                httpRequestString.append(paramsString);
             }
 
             // autoFlush: true --> 刷新输出缓存区

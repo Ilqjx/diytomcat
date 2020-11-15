@@ -207,6 +207,7 @@ public class Context {
                     String servletName = className_servletName.get(className);
                     Map<String, String> initParams = servletClassName_initParams.get(className);
 
+                    // 一个 Servlet 对应着一个 ServletConfig（Servlet 配置信息类）
                     ServletConfig servletConfig = new StandardServletConfig(servletContext, servletName, initParams);
 
                     servlet.init(servletConfig);

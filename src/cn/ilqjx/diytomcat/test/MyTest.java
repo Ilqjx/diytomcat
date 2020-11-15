@@ -7,6 +7,8 @@ import cn.ilqjx.diytomcat.util.Constant;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author upfly
@@ -15,8 +17,25 @@ import java.io.File;
 public class MyTest {
 
     @Test
+    public void test9() {
+        String str = "";
+
+        String[] strings = str.split("&");
+        for (int i = 0; i < strings.length; i++) {
+            System.out.println(strings[i]);
+        }
+
+    //     String s = StrUtil.subBefore(str, "abc", false);
+    //     System.out.println(s);
+    }
+
+    @Test
     public void test8() {
-        System.out.println(Object.class.getName());
+        Map<String, String> map = new HashMap<>();
+        map.put(null, null);
+        map.put(" ", "");
+        System.out.println(map.get(null));
+        System.out.println(map.get(" "));
     }
 
     @Test

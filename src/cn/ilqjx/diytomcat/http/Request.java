@@ -1,6 +1,8 @@
 package cn.ilqjx.diytomcat.http;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.ilqjx.diytomcat.catalina.Context;
 import cn.ilqjx.diytomcat.catalina.Engine;
 import cn.ilqjx.diytomcat.catalina.Service;
@@ -10,6 +12,10 @@ import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author upfly
@@ -24,9 +30,14 @@ public class Request extends BaseRequest {
     private String method; // http 请求中的 method
     private ServletContext servletContext;
 
+    private String queryString; // 查询字符串
+    private Map<String, String[]> parameterMap; // 存放请求参数
+
     public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
         this.service = service;
+        this.parameterMap = new LinkedHashMap<>();
+
         parseHttpRequest();
         if (StrUtil.isEmpty(requestString)) {
             return;
@@ -43,6 +54,8 @@ public class Request extends BaseRequest {
                 uri = "/";
             }
         }
+
+        parseParameters();
     }
 
     public String getRequestString() {
@@ -70,6 +83,31 @@ public class Request extends BaseRequest {
     @Override
     public String getRealPath(String path) {
         return getServletContext().getRealPath(path);
+    }
+
+    @Override
+    public String getParameter(String name) {
+        String[] values = parameterMap.get(name);
+        // 什么时候存在 values 长度为 0 的情况？ name=
+        if (values != null && values.length != 0) {
+            return values[0];
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, String[]> getParameterMap() {
+        return parameterMap;
+    }
+
+    @Override
+    public Enumeration<String> getParameterNames() {
+        return Collections.enumeration(parameterMap.keySet());
+    }
+
+    @Override
+    public String[] getParameterValues(String name) {
+        return parameterMap.get(name);
     }
 
     /**
@@ -138,5 +176,47 @@ public class Request extends BaseRequest {
         }
         // 带参
         uri = StrUtil.subBefore(temp, "?", false);
+    }
+
+    /**
+     * 解析参数
+     */
+    private void parseParameters() {
+        if ("GET".equals(method)) {
+            String url = StrUtil.subBetween(requestString, " ");
+            // 如果没有 ? 或者 ? 后面没有参数都返回空串
+            queryString = StrUtil.subAfter(url, "?", false);
+        } else if ("POST".equals(method)) {
+            queryString = StrUtil.subAfter(requestString, "\r\n\r\n", false);
+        }
+
+        if (queryString == null || queryString.equals("")) {
+            return;
+        }
+
+        parseQueryString();
+    }
+
+    /**
+     * 解析查询字符串
+     */
+    private void parseQueryString() {
+        // 对 queryString 进行解码
+        queryString = URLUtil.decode(queryString);
+        String[] parameterValues = queryString.split("&");
+        for (String parameterValue : parameterValues) {
+            // 如果没有 = 会返回 parameterValue
+            String name = StrUtil.subBefore(parameterValue, "=", false);
+            String value = StrUtil.subAfter(parameterValue, "=", false);
+
+            String[] values = parameterMap.get(name);
+            if (values == null) {
+                values = new String[] {value};
+            } else {
+                values = ArrayUtil.append(values, value);
+            }
+
+            parameterMap.put(name, values);
+        }
     }
 }
