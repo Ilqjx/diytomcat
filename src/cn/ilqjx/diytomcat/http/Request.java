@@ -22,6 +22,7 @@ import java.util.Map;
  * @create 2020-09-12 19:51
  */
 public class Request extends BaseRequest {
+
     private String requestString;
     private String uri;
     private Socket socket;
