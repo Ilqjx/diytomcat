@@ -47,6 +47,7 @@ public class Connector implements Runnable {
             //     System.out.println(port + "端口已被占用");
             //     return;
             // }
+
             // 服务端打开 port 端口
             ServerSocket ss = new ServerSocket(port);
 

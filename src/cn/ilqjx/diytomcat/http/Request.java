@@ -14,6 +14,8 @@ import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.*;
 
@@ -132,6 +134,83 @@ public class Request extends BaseRequest {
     public int getIntHeader(String name) {
         String value = headerMap.get(name);
         return Convert.toInt(value, 0);
+    }
+
+    /**
+     * 获取客户端的 ip 地址
+     *
+     * @return
+     */
+    @Override
+    public String getLocalAddr() {
+        InetAddress localAddress = socket.getLocalAddress();
+        String ip = localAddress.getHostAddress();
+        return ip;
+    }
+
+    /**
+     * 获取客户端的主机名
+     *
+     * @return
+     */
+    @Override
+    public String getLocalName() {
+        return socket.getInetAddress().getHostName();
+    }
+
+    /**
+     * 获取客户端的端口号
+     *
+     * @return
+     */
+    @Override
+    public int getLocalPort() {
+        return socket.getLocalPort();
+    }
+
+    /**
+     * 获取请求协议
+     *
+     * @return
+     */
+    @Override
+    public String getProtocol() {
+        return "HTTP/1.1";
+    }
+
+    /**
+     * 返回套接字所连接的端点的地址
+     *
+     * @return
+     */
+    @Override
+    public String getRemoteAddr() {
+        // 获取套接字所连接的端点的地址
+        InetSocketAddress isa = (InetSocketAddress) socket.getRemoteSocketAddress();
+        String temp = isa.getAddress().toString();
+        return StrUtil.subAfter(temp, "/", false);
+    }
+
+    /**
+     * 获取套接字所连接的端点的主机名
+     *
+     * @return
+     */
+    @Override
+    public String getRemoteHost() {
+        InetSocketAddress isa = (InetSocketAddress) socket.getRemoteSocketAddress();
+        return isa.getHostName();
+    }
+
+    /**
+     * 获取套接字所连接的端点的端口
+     *
+     * @return
+     */
+    @Override
+    public int getRemotePort() {
+        InetSocketAddress isa = (InetSocketAddress) socket.getRemoteSocketAddress();
+        return isa.getPort();
     }
 
     /**
