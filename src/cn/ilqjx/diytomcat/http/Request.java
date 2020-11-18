@@ -1,5 +1,7 @@
 package cn.ilqjx.diytomcat.http;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
@@ -11,18 +13,15 @@ import cn.ilqjx.diytomcat.util.MiniBrowser;
 import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author upfly
  * @create 2020-09-12 19:51
  */
 public class Request extends BaseRequest {
-
     private String requestString;
     private String uri;
     private Socket socket;
@@ -33,11 +32,13 @@ public class Request extends BaseRequest {
 
     private String queryString; // 查询字符串
     private Map<String, String[]> parameterMap; // 存放请求参数
+    private Map<String, String> headerMap; // 存放头信息
 
     public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
         this.service = service;
         this.parameterMap = new LinkedHashMap<>();
+        this.headerMap = new HashMap<>();
 
         parseHttpRequest();
         if (StrUtil.isEmpty(requestString)) {
@@ -57,6 +58,7 @@ public class Request extends BaseRequest {
         }
 
         parseParameters();
+        parseHeaders();
     }
 
     public String getRequestString() {
@@ -109,6 +111,27 @@ public class Request extends BaseRequest {
     @Override
     public String[] getParameterValues(String name) {
         return parameterMap.get(name);
+    }
+
+    @Override
+    public String getHeader(String name) {
+        if (name == null) {
+            return null;
+        }
+        // 头信息名称不区分大小写
+        name = name.toLowerCase();
+        return headerMap.get(name);
+    }
+
+    @Override
+    public Enumeration<String> getHeaderNames() {
+        return Collections.enumeration(headerMap.keySet());
+    }
+
+    @Override
+    public int getIntHeader(String name) {
+        String value = headerMap.get(name);
+        return Convert.toInt(value, 0);
     }
 
     /**
@@ -218,6 +241,35 @@ public class Request extends BaseRequest {
             }
 
             parameterMap.put(name, values);
+        }
+    }
+
+    /**
+     * 解析HTTP请求中的头信息
+     */
+    private void parseHeaders() {
+        StringReader sr = new StringReader(requestString);
+        List<String> lines = new ArrayList<>();
+        IoUtil.readLines(sr, lines);
+        // 第一行为请求行，跳过
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+
+            // 请求头和请求体之间的空行
+            if (line.length() == 0) {
+                break;
+            }
+
+            // String[] strings = line.split(":");
+            // String name = strings[0];
+            // String value = strings[1];
+
+            // 防止出现数组越界，所以用 StrUtil.subBefore() 和 StrUtil.subAfter()
+            // 转换为小写，因为头信息名称(name)不区分大小写
+            String name = StrUtil.subBefore(line, ":", false).trim().toLowerCase();
+            String value = StrUtil.subAfter(line, ":", false).trim();
+
+            headerMap.put(name, value);
         }
     }
 }

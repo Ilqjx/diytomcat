@@ -1,5 +1,7 @@
 package cn.ilqjx.diytomcat.test;
 
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.ilqjx.diytomcat.http.Request;
@@ -7,7 +9,10 @@ import cn.ilqjx.diytomcat.util.Constant;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +22,56 @@ import java.util.Map;
 public class MyTest {
 
     @Test
+    public void test12() {
+        String line = "name";
+        String name = StrUtil.subBefore(line, ":", false).trim().toLowerCase();
+        String value = StrUtil.subAfter(line, ":", false).trim();
+        System.out.println(name); // "name"
+        System.out.println(value); // ""
+    }
+
+    @Test
+    public void test11() {
+        String requestString = "HTTP/1.1\r\nname: guozhenwei\r\nage: 18\r\n\r\nname=guozhenwei&age=18";
+        parseHeaders(requestString);
+    }
+
+    private void parseHeaders(String requestString) {
+        StringReader sr = new StringReader(requestString);
+        List<String> lines = new ArrayList<>();
+        IoUtil.readLines(sr, lines);
+        // 第一行为请求行，跳过
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
+
+            // System.out.println("line: " + line);
+
+            // 请求头和请求体之间的空行
+            if (line.length() == 0) {
+                break;
+            }
+
+            // String[] strings = line.split(":");
+            // String name = strings[0];
+            // String value = strings[1];
+
+            String name = StrUtil.subBefore(line, ":", false).trim();
+            String value = StrUtil.subAfter(line, ":", false).trim();
+
+            System.out.println("name: " + name + ", value: " + value);
+
+            // headerMap.put(name, value);
+        }
+    }
+
+    @Test
+    public void test10() {
+        String name = "2000";
+        Integer i = Convert.toInt(name, 0);
+        System.out.println(i);
+    }
+
+    @Test
     public void test9() {
         String str = "";
 
@@ -24,9 +79,6 @@ public class MyTest {
         for (int i = 0; i < strings.length; i++) {
             System.out.println(strings[i]);
         }
-
-    //     String s = StrUtil.subBefore(str, "abc", false);
-    //     System.out.println(s);
     }
 
     @Test

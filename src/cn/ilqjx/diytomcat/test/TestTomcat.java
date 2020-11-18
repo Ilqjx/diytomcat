@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -149,6 +151,34 @@ public class TestTomcat {
         String response1 = getContentString("/javaweb/hello");
         String response2 = getContentString("/javaweb/hello");
         Assert.assertEquals(response1, response2);
+    }
+
+    @Test
+    public void testGetParam() {
+        String uri = "/javaweb/param";
+        String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "guozhenwei");
+        String response = MiniBrowser.getContentString(url, params, true);
+        System.out.println("response: " + response);
+        Assert.assertEquals(response, "get name: guozhenwei");
+    }
+
+    @Test
+    public void testPostParam() {
+        String uri = "/javaweb/param";
+        String url = StrUtil.format("http://{}:{}{}", ip, port, uri);
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "guozhenwei");
+        String response = MiniBrowser.getContentString(url, params, false);
+        Assert.assertEquals(response, "post name: guozhenwei");
+    }
+
+    @Test
+    public void testHeader() {
+        String uri = "/javaweb/header";
+        String response = getContentString(uri);
+        Assert.assertEquals(response, "how2j mini browser / java1.8");
     }
 
     /**
