@@ -302,7 +302,7 @@ public class Request extends BaseRequest {
     @Override
     public String getServletPath() {
         // uri 包括工程路径
-        return uri;
+        return StrUtil.removePrefix(uri, getContextPath());
     }
 
     /**
