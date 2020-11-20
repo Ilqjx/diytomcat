@@ -137,7 +137,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取客户端的 ip 地址
+     * 获取本地（服务器）的 ip 地址
      *
      * @return
      */
@@ -149,7 +149,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取客户端的主机名
+     * 获取本地（服务器）的主机名
      *
      * @return
      */
@@ -159,7 +159,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取客户端的端口号
+     * 获取本地（服务器）的端口号
      *
      * @return
      */
@@ -169,7 +169,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取请求协议
+     * 获取请求协议和版本号
      *
      * @return
      */
@@ -179,7 +179,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 返回套接字所连接的端点的地址
+     * 返回远程（客户端）的地址
      *
      * @return
      */
@@ -192,7 +192,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取套接字所连接的端点的主机名
+     * 获取远程（客户端）的主机名
      *
      * @return
      */
@@ -203,7 +203,7 @@ public class Request extends BaseRequest {
     }
 
     /**
-     * 获取套接字所连接的端点的端口
+     * 获取远程（客户端）的端口
      *
      * @return
      */
@@ -211,6 +211,98 @@ public class Request extends BaseRequest {
     public int getRemotePort() {
         InetSocketAddress isa = (InetSocketAddress) socket.getRemoteSocketAddress();
         return isa.getPort();
+    }
+
+    /**
+     * 获取协议
+     *
+     * @return
+     */
+    @Override
+    public String getScheme() {
+        return "HTTP";
+    }
+
+    /**
+     * 获取服务器 ip 和 端口号
+     *
+     * @return
+     */
+    @Override
+    public String getServerName() {
+        return getHeader("host");
+    }
+
+    /**
+     * 获取本地（服务器）端口号
+     *
+     * @return
+     */
+    @Override
+    public int getServerPort() {
+        return getLocalPort();
+    }
+
+    /**
+     * 获取工程路径
+     *
+     * @return
+     */
+    @Override
+    public String getContextPath() {
+        String result = this.getContext().getPath();
+        if ("/".equals(result)) {
+            return "";
+        }
+        return result;
+    }
+
+    /**
+     * 获取请求 URI
+     *
+     * @return
+     */
+    @Override
+    public String getRequestURI() {
+        return uri;
+    }
+
+    /**
+     * 获取请求 URL
+     *
+     * @return
+     */
+    @Override
+    public StringBuffer getRequestURL() {
+        StringBuffer url = new StringBuffer();
+        String scheme = getScheme();
+        String ip = getRemoteAddr();
+        int port = getServerPort();
+        String uri = getRequestURI();
+
+        url.append(scheme);
+        url.append("://");
+        url.append(ip);
+
+        if (!("HTTP".equals(scheme) && port == 80 || "HTTPS".equals(scheme) && port == 443)) {
+            url.append(":");
+            url.append(port);
+        }
+
+        url.append(uri);
+
+        return url;
+    }
+
+    /**
+     * 获取 servlet 路径(url-pattern 标签中的内容)
+     *
+     * @return
+     */
+    @Override
+    public String getServletPath() {
+        // uri 包括工程路径
+        return uri;
     }
 
     /**

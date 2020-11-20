@@ -40,7 +40,7 @@ public class Context {
     private boolean reloadable; // 是否启用热加载
     private ContextFileChangeWatcher contextFileChangeWatcher; // 文件监听器
 
-    private ServletContext servletContext;
+    private ServletContext servletContext; // servlet 上下文对象
 
     private Map<Class<?>, HttpServlet> servletPool; // 存放 Servlet 对象
 
