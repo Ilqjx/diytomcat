@@ -15,7 +15,7 @@ public class Constant {
     public static final int CODE_500 = 500;
 
     public static final String RESPONSE_HEAD_200 =
-            "HTTP/1.1 200 OK\r\n" + "Content-Type: {}\r\n\r\n"; // 200 头信息
+            "HTTP/1.1 200 OK\r\n" + "Content-Type: {}{}\r\n\r\n"; // 200 头信息
     public static final String RESPONSE_HEAD_404 =
             "HTTP/1.1 404 Not Found\r\n" + "Content-Type: text/html\r\n\r\n"; // 404 头信息
     public static final String RESPONSE_HEAD_500 =

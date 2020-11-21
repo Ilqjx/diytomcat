@@ -16,7 +16,6 @@ public class BaseResponse implements HttpServletResponse {
 
     @Override
     public void addCookie(Cookie cookie) {
-
     }
 
     @Override

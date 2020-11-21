@@ -181,6 +181,13 @@ public class TestTomcat {
         Assert.assertEquals(response, "how2j mini browser / java1.8");
     }
 
+    @Test
+    public void testSetCookie() {
+        String uri = "/javaweb/setCookie";
+        String html = getHttpString(uri);
+        containAssert(html, "Set-Cookie: name=guozhenwei(cookie);Expires=");
+    }
+
     /**
      * 以二进制形式获取 http 响应的内容
      *
