@@ -11,6 +11,7 @@ import cn.ilqjx.diytomcat.catalina.Service;
 import cn.ilqjx.diytomcat.util.MiniBrowser;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -35,6 +36,8 @@ public class Request extends BaseRequest {
     private String queryString; // 查询字符串
     private Map<String, String[]> parameterMap; // 存放请求参数
     private Map<String, String> headerMap; // 存放头信息
+
+    private Cookie[] cookies; // 存放 Cookie 信息
 
     public Request(Socket socket, Service service) throws IOException {
         this.socket = socket;
@@ -61,6 +64,7 @@ public class Request extends BaseRequest {
 
         parseParameters();
         parseHeaders();
+        parseCookies();
     }
 
     public String getRequestString() {
@@ -306,6 +310,16 @@ public class Request extends BaseRequest {
     }
 
     /**
+     * 获取 Cookie 信息
+     *
+     * @return
+     */
+    @Override
+    public Cookie[] getCookies() {
+        return cookies;
+    }
+
+    /**
      * 解析 method
      *
      * @return
@@ -442,5 +456,31 @@ public class Request extends BaseRequest {
 
             headerMap.put(name, value);
         }
+    }
+
+    /**
+     * 解析 Cookies
+     */
+    private void parseCookies() {
+        List<Cookie> list = new ArrayList<>();
+        String cookies = getHeader("cookie");
+        if (cookies == null || cookies.length() == 0) {
+            return;
+        }
+
+        String[] pairs = cookies.split(";");
+        for (int i = 0; i < pairs.length; i++) {
+            if (pairs[i].length() == 0) {
+                continue;
+            }
+
+            String name = StrUtil.subBefore(pairs[i], "=", false).trim();
+            String value = StrUtil.subAfter(pairs[i], "=", false).trim();
+
+            Cookie cookie = new Cookie(name, value);
+            list.add(cookie);
+        }
+
+        this.cookies = ArrayUtil.toArray(list, Cookie.class);
     }
 }

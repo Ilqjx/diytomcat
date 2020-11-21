@@ -22,6 +22,24 @@ import java.util.Map;
 public class MyTest {
 
     @Test
+    public void test14() {
+        String ip = "127.0.0.1";
+        String port = "80";
+        String uri = "/javaweb";
+        String format = String.format("http://%s:%s%s", ip, port, uri);
+        System.out.println(format);
+    }
+
+    @Test
+    public void test13() {
+        int[] arr = null;
+        // NullPointerException
+        for (int i : arr) {
+            System.out.println(i);
+        }
+    }
+
+    @Test
     public void test12() {
         String line = "name";
         String name = StrUtil.subBefore(line, ":", false).trim().toLowerCase();
